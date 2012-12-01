@@ -1,0 +1,1130 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset=utf-8>
+    <!--
+     | Version 10.1.1
+     | Copyright 2012 Esri
+     |
+     | Licensed under the Apache License, Version 2.0 (the "License");
+     | you may not use this file except in compliance with the License.
+     | You may obtain a copy of the License at
+     |
+     |    http://www.apache.org/licenses/LICENSE-2.0
+     |
+     | Unless required by applicable law or agreed to in writing, software
+     | distributed under the License is distributed on an "AS IS" BASIS,
+     | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     | See the License for the specific language governing permissions and
+     | limitations under the License.
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Election Polling Place</title>
+    <link rel="shortcut icon" href="images/appIcon.ico" />
+    <link rel="apple-touch-icon" href="images/EPPIcon.png" />
+    <link id="stylesheet" href='http://serverapi.arcgisonline.com/jsapi/arcgis/2.8/js/dojo/dojox/mobile/themes/iPhone/iPhone.css'
+        rel='stylesheet' />
+    <link href="styles/electionPollingPlace.css" rel="stylesheet" type="text/css" />
+    <link rel="Stylesheet" id="dynamicStyleSheet" />
+    <script type="text/javascript">
+        djConfig = {
+            parseOnLoad: true,
+            mblHideAddressBar: false,
+            baseUrl: "./",
+            modulePaths: { "js": "js" }
+        }
+    </script>
+    <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=2.8compact">
+    </script>
+    <script src="js/infoWindow.js" type="text/javascript"></script>
+    <script type="text/javascript" src="js/baseMapGallery.js"></script>
+    <script src="js/modernizr-2.5.3.js" type="text/javascript"></script>
+    <script type="text/javascript" src="js/route.js"></script>
+    <script type="text/javascript" src="js/locator.js"></script>
+    <script type="text/javascript" src="js/utils.js"></script>
+    <script type="text/javascript" src="js/result.js"></script>
+    <script src="js/webmap.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        dojo.require("esri.map");
+        dojo.require("mobile.InfoWindow");
+        dojo.require("esri.layers.FeatureLayer");
+        dojo.require("esri.tasks.geometry");
+        dojo.require("esri.tasks.query");
+        dojo.require("esri.tasks.locator");
+        dojo.require("esri.tasks.route");
+        dojo.require("dojo.date.locale");
+        dojo.require("dojox.mobile.parser");
+        dojo.require("dojox.mobile");
+        dojo.require("js.Config");
+        dojo.require("dojo.window");
+        dojo.require("js.date");
+
+        var baseMapLayers;  //Variable for storing base map layers
+        var infoBoxWidth; //variable for storing the width of the box
+        var showCommentsTab; //variable used for toggling the comments tab
+        var formatDateAs; //variable to store the date format
+        var desgFlag = false; //flag used for setting the designation
+        var devObjectId;    //Temp variable for storing feature object ID
+        var directions; //Directions in route.
+        var fontSize; //variable for storing font sizes for all devices.
+        var showNullValueAs; //variable to store the deafault value for replacing null values
+        var webMapId; //Variable used to store webmap id
+        var generateRouteToNonDesignatedPollingPlace; //flag used for setting the non designated polling place
+        var handleElected; ////variable for storing elected officials container touch event
+        var handlePoll; //variable for storing polling container touch event
+        var highlightPollLayerId = "highlightPollLayerId"; //variable to store highlighting layer ID
+        var infoPopupFieldsCollection; //array used for storing the fields collection in the info window
+        var infoTitle; //variable used for the webmap to store the title of the header
+        var infoWindowContent; //variable used to store the info window content
+        var infoWindowHeader; //variable used to store the info window header
+        var infoPopupHeight; //variable used for storing the info window height
+        var infoPopupWidth; //varible used for storing the info window width
+        var isBrowser = false; //flag set for browser web device
+        var isiOS = false; //flag set for ios devices
+        var isMobileDevice = false; //flag set for mobile devices
+        var isTablet = false; //flag det for tablet devices
+        var locatorMarkupSymbolPath; //variable for storing the locator marker image URL
+        var locatorURL; //variable to store locator object for geocoding
+        var map;    //varibale to store map object
+        var mapPoint;   //variable to store mappoint
+        var messages; //variable used for storing the error mesages
+        var newLeft = 0;    //Variable to store the new left value for carrosuel of polling place
+        var newLeftOffice = 0;    //Variable to store the new left value for carrosuel of Elected Offices
+        var pollingCommentsLayer; //variable to store polling comments layer URL
+        var pollingCommentsLayerId = "pollingCommentsLayerId"; //variable to store polling comments layer Id
+        var pollingPlaceData;  //variable to store pollingplace layer URL
+        var pollMobileLayer; //variable to store pollingplace layer URL for mobile
+        var pollLayer;  //variable to store pollingplace layer URL
+        var pollLayerId = 'pollLayerID';    //variable to store polling place layer ID
+        var pollPoint; //Point represent polling place geometry.
+        var precinctLayer; //variable to store precinct layer URL
+        var precinctLayerId = 'precinctLayerID';    //variable to store precinct layer ID
+        var precinctOfficeLayer; //variable to store table layer URL
+        var precinctOfficeLayerId = 'precinctOfficeLayerId'; //variable to store table layer ID
+        var queryTask; //varaible used to query the layer
+        var electedOfficialsTabData; //array used for storing the collection of fields for election results
+        var locatorRippleSize; //variable to store the size of the ripple
+        var routeGraphicsLayerId = 'routeGraphicsLayerID'; //variable to store route layer Id
+        var routeSymbol; //Symbol to mark the route.
+        var routeTask; //Route Task to find the route.
+        var locatorFields;           //Variable for storing configurable address fields
+        var selectedPollPoint; //variable used to store the selected polling place
+        var tempGraphicsLayerId = 'tempGraphicsLayerID';  //variable to store graphics layer ID
+        var mapSharingOptions; //variable for storing the tiny service URL
+        var useWebmap; //flag used for setting the webmap use.
+        var referenceOverlayLayer;
+
+
+        //Function to initialize the map and read data from Configuration file
+        function init() {
+            esri.config.defaults.io.proxyUrl = "proxy.ashx";        //Setting to use proxy file
+            esriConfig.defaults.io.alwaysUseProxy = false;
+            esriConfig.defaults.io.timeout = 180000;    //esri request timeout value
+
+            var userAgent = window.navigator.userAgent;
+
+            if (userAgent.indexOf("iPhone") >= 0 || userAgent.indexOf("iPad") >= 0) {
+                isiOS = true;
+            }
+            if (userAgent.indexOf("Android") >= 0 || userAgent.indexOf("iPhone") >= 0) {
+                fontSize = 15;
+                isMobileDevice = true;
+                dojo.byId('dynamicStyleSheet').href = "styles/mobile.css";
+            }
+            else if (userAgent.indexOf("iPad") >= 0) {
+                fontSize = 14;
+                isTablet = true;
+                dojo.byId('dynamicStyleSheet').href = "styles/tablet.css";
+            }
+            else {
+                fontSize = 11;
+                isBrowser = true;
+                dojo.byId('dynamicStyleSheet').href = "styles/browser.css";
+            }
+            dojo.byId("divSplashContent").style.fontSize = fontSize + "px";
+
+            dojo.connect(dojo.byId("txtAddress"), 'onkeydown', function (evt) {
+                if (evt) {
+                    var key = evt.which || evt.keyCode;
+                    if (key == 13) {
+                        if (dojo.coords("divAddressHolder").h > 0) {
+                            dojo.byId("txtAddress").blur();
+                            LocateAddress();
+                        }
+                    }
+                }
+            });
+            window.onkeydown = function (e) {
+                return !(e.keyCode == 9);
+            };
+
+            if (!Modernizr.geolocation) {
+                dojo.byId("tdGeolocation").style.display = "none";
+            }
+
+            var responseObject = new js.Config();
+            useWebmap = responseObject.UseWebmap;
+            if (useWebmap) {
+                webMapId = responseObject.WebMapId;
+                var count = 0;
+                var webmapDetails = getWebMapInfo("electionPollingPlace", webMapId);
+                webmapDetails.addCallback(function (webmapInfo) {
+                    electedOfficialsTabData = [];
+                    infoPopupFieldsCollection = []
+                    for (var b = 0; b < webmapInfo.operationalLayers.length; b++) {
+                        dojo.io.script.get({
+                            url: webmapInfo.operationalLayers[b].url + "?f=pjson",
+                            callbackParamName: "callback",
+                            load: function (data) {
+                                count++;
+                                for (var c = 0; c < webmapInfo.operationalLayers.length; c++) {
+                                    if (this.url == webmapInfo.operationalLayers[c].url + "?f=pjson") {
+                                        break;
+                                    }
+                                }
+                                if (data.geometryType == "esriGeometryPolygon") {
+                                    if (webmapInfo.operationalLayers[c].popupInfo) {
+                                        if (!electedOfficialsTabData[webmapInfo.operationalLayers[c].id]) {
+                                            dataLayer = [];
+                                            for (var d = 0; d < webmapInfo.operationalLayers[c].popupInfo.fieldInfos.length; d++) {
+                                                if (webmapInfo.operationalLayers[c].popupInfo.fieldInfos[d].visible) {
+                                                    dataLayer.push({ "DisplayText": webmapInfo.operationalLayers[c].popupInfo.fieldInfos[d].label + ":", "FieldName": "${" + webmapInfo.operationalLayers[c].popupInfo.fieldInfos[d].fieldName + "}" });
+                                                }
+                                            }
+                                            electedOfficialsTabData[webmapInfo.operationalLayers[c].id] = [];
+                                            electedOfficialsTabData[webmapInfo.operationalLayers[c].id] = ({ "ServiceUrl": webmapInfo.operationalLayers[c].url, "HeaderColor": "#393939", "Title": webmapInfo.operationalLayers[c].title.split("- ")[1], "Data": dataLayer });
+                                        }
+                                    }
+                                    else {
+                                        precinctLayer.ServiceUrl = webmapInfo.operationalLayers[c].url;
+                                    }
+                                }
+                                else {
+                                    if (!isMobileDevice) {
+                                        pollLayer.ServiceUrl = webmapInfo.operationalLayers[c].url;
+                                        if (webmapInfo.operationalLayers[c].popupInfo.title) {
+                                            infoTitle = webmapInfo.operationalLayers[c].popupInfo.title.split("{")[0];
+                                            infoWindowHeader = "$" + webmapInfo.operationalLayers[c].popupInfo.title.split(": ")[1];
+                                        }
+                                        if (webmapInfo.operationalLayers[c].popupInfo.fieldInfos.length > 0) {
+                                            for (var r = 0; r < webmapInfo.operationalLayers[c].popupInfo.fieldInfos.length; r++) {
+                                                if (webmapInfo.operationalLayers[c].popupInfo.fieldInfos[r].visible) {
+                                                    infoWindowContent = "${" + webmapInfo.operationalLayers[c].popupInfo.fieldInfos[r].fieldName + "}";
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        for (var e = 0; e < webmapInfo.operationalLayers[c].popupInfo.fieldInfos.length; e++) {
+                                            if (webmapInfo.operationalLayers[c].popupInfo.fieldInfos[e].visible) {
+                                                infoPopupFieldsCollection.push({ "DisplayText": webmapInfo.operationalLayers[c].popupInfo.fieldInfos[e].label + ":", "FieldName": "${" + webmapInfo.operationalLayers[c].popupInfo.fieldInfos[e].fieldName + "}" });
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        pollMobileLayer.ServiceUrl = webmapInfo.operationalLayers[c].url;
+                                        if (webmapInfo.operationalLayers[c].popupInfo.title) {
+                                            infoTitle = webmapInfo.operationalLayers[c].popupInfo.title.split("{")[0];
+                                            infoWindowHeader = "$" + webmapInfo.operationalLayers[c].popupInfo.title.split(": ")[1];
+                                        }
+                                        if (webmapInfo.operationalLayers[c].popupInfo.fieldInfos.length > 0) {
+                                            for (var r = 0; r < webmapInfo.operationalLayers[c].popupInfo.fieldInfos.length; r++) {
+                                                if (webmapInfo.operationalLayers[c].popupInfo.fieldInfos[r].visible) {
+                                                    infoWindowContent = "${" + webmapInfo.operationalLayers[c].popupInfo.fieldInfos[r].fieldName + "}";
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        for (var e = 0; e < webmapInfo.operationalLayers[c].popupInfo.fieldInfos.length; e++) {
+                                            if (webmapInfo.operationalLayers[c].popupInfo.fieldInfos[e].visible) {
+                                                infoPopupFieldsCollection.push({ "DisplayText": webmapInfo.operationalLayers[c].popupInfo.fieldInfos[e].label + ":", "FieldName": "${" + webmapInfo.operationalLayers[c].popupInfo.fieldInfos[e].fieldName + "}" });
+                                            }
+                                        }
+                                    }
+                                }
+                                if (count == webmapInfo.operationalLayers.length) {
+                                    MapInitFunction();
+                                }
+                            },
+                            error: function (error) {
+                                alert(error.message);
+                            }
+                        });
+                    }
+                });
+            }
+            Initialize(responseObject);
+        }
+
+        //function calls at the intialize state
+        function Initialize(responseObject) {
+            var infoWindow = new mobile.InfoWindow({
+                domNode: dojo.create("div", null, dojo.byId("map"))
+            });
+
+            if (isMobileDevice) {
+                dojo.byId('divInfoContainer').style.display = "none";
+                dojo.replaceClass("divAddressHolder", "hideContainer", "hideContainerHeight");
+                dojo.byId('divAddressContainer').style.display = "none";
+                dojo.removeClass(dojo.byId('divInfoContainer'), "opacityHideAnimation");
+                dojo.removeClass(dojo.byId('divAddressContainer'), "hideContainerHeight");
+                dojo.byId('divSplashScreenContent').style.width = "95%";
+                dojo.byId('divSplashScreenContent').style.height = "95%";
+                dojo.byId('imgDirections').src = "images/imgDirections.png";
+                dojo.byId('imgDirections').title = "Directions";
+                dojo.byId("divLogo").style.display = "none";
+                dojo.byId("lblAppName").style.display = "none";
+                dojo.byId("lblAppName").style.width = "80%";
+            }
+            else {
+                var imgBasemap = document.createElement('img');
+                imgBasemap.src = "images/imgBaseMap.png";
+                imgBasemap.className = "imgOptions";
+                imgBasemap.title = "Switch Basemap";
+                imgBasemap.id = "imgBaseMap";
+                imgBasemap.style.cursor = "pointer";
+                imgBasemap.onclick = function () {
+                    ShowBaseMaps();
+                }
+                dojo.byId("tdBaseMap").appendChild(imgBasemap);
+                dojo.byId("tdBaseMap").className = "tdHeader";
+                dojo.byId('divSplashScreenContent').style.width = "350px";
+                dojo.byId('divSplashScreenContent').style.height = "290px";
+                dojo.byId('divAddressContainer').style.display = "block";
+                dojo.byId('imgDirections').src = "images/Details.png";
+                dojo.byId('imgDirections').title = "Details";
+                dojo.byId('imgDirections').style.display = "none";
+                dojo.byId("divLogo").style.display = "block";
+            }
+
+            dojo.byId('imgApp').src = responseObject.ApplicationIcon;
+            dojo.byId("lblAppName").innerHTML = responseObject.ApplicationName;
+            dojo.byId('divSplashContent').innerHTML = responseObject.SplashScreenMessage;
+
+            dojo.xhrGet(
+                    {
+                        url: "ErrorMessages.xml",
+                        handleAs: "xml",
+                        preventCache: true,
+                        load: function (xmlResponse) {
+                            messages = xmlResponse;
+                        }
+                    });
+
+
+            map = new esri.Map("map", {
+                slider: true,
+                infoWindow: infoWindow
+            });
+
+            ShowProgressIndicator();
+
+            locatorFields = responseObject.LocatorFields.split(",");
+
+            geometryService = new esri.tasks.GeometryService(responseObject.GeometryService);
+            locatorURL = responseObject.LocatorURL;
+            pollLayer = responseObject.PollLayer;
+            pollMobileLayer = responseObject.PollMobileLayer;
+            precinctLayer = responseObject.PrecinctLayer;
+            precinctOfficeLayer = responseObject.PrecinctOfficeLayer;
+            baseMapLayers = responseObject.BaseMapLayers;
+            electedOfficialsTabData = responseObject.ElectedOfficialsTabData;
+            infoPopupFieldsCollection = responseObject.InfoPopupFieldsCollection;
+            pollingPlaceData = responseObject.PollingPlaceTabData;
+            infoBoxWidth = responseObject.InfoBoxWidth;
+            mapSharingOptions = responseObject.MapSharingOptions;
+            locatorMarkupSymbolPath = responseObject.LocatorMarkupSymbolPath;
+            infoPopupWidth = responseObject.InfoPopupWidth;
+            infoPopupHeight = responseObject.InfoPopupHeight;
+            infoWindowContent = responseObject.InfoWindowContent;
+            infoWindowHeader = responseObject.InfoWindowHeader;
+            showCommentsTab = responseObject.ShowCommentsTab;
+            locatorRippleSize = responseObject.LocatorRippleSize;
+            formatDateAs = responseObject.FormatDateAs;
+            generateRouteToNonDesignatedPollingPlace = responseObject.GenerateRouteToNonDesignatedPollingPlace;
+            pollingCommentsLayer = responseObject.PollingCommentsLayer;
+            showNullValueAs = responseObject.ShowNullValueAs;
+            referenceOverlayLayer = responseObject.ReferenceOverlayLayer;
+
+            if (!showCommentsTab) {
+                dojo.byId('tdComments').style.display = "none";
+            }
+
+            CreateBaseMapComponent();
+            dojo.connect(map, "onLoad", function () {
+                var zoomExtent;
+                var extent = GetQuerystring('extent');
+                if (extent != "") {
+                    zoomExtent = extent.split(',');
+                }
+                else {
+                    zoomExtent = responseObject.DefaultExtent.split(",");
+                }
+                var startExtent = new esri.geometry.Extent(parseFloat(zoomExtent[0]), parseFloat(zoomExtent[1]), parseFloat(zoomExtent[2]), parseFloat(zoomExtent[3]), map.spatialReference);
+                map.setExtent(startExtent);
+                if (!useWebmap) {
+                    MapInitFunction();
+                }
+            });
+
+
+            dojo.connect(map, "onExtentChange", function (evt) {
+                SetMapTipPosition();
+                if (dojo.coords("divAppContainer").h > 0) {
+                    ShareLink(false);
+                }
+            });
+
+            dojo.connect(map, "onClick", FindLocation);
+
+            dojo.byId("txtAddress").setAttribute("defaultAddress", responseObject.LocatorDefaultAddress);
+            dojo.byId('txtAddress').value = responseObject.LocatorDefaultAddress;
+            routeTask = new esri.tasks.RouteTask(responseObject.RouteServiceURL);
+            routeSymbol = new esri.symbol.SimpleLineSymbol().setColor(responseObject.RouteColor).setWidth(responseObject.RouteWidth);
+            dojo.connect(routeTask, "onSolveComplete", function (routeResponse) {
+                ShowRoute(routeResponse);
+            });
+            dojo.connect(dojo.byId('imgHelp'), "onclick", function () {
+                window.open(responseObject.HelpURL);
+            });
+        }
+        //function called when map is initialized
+        function MapInitFunction() {
+            if (dojo.query('.logo-med', dojo.byId('map')).length > 0) {
+                dojo.query('.logo-med', dojo.byId('map'))[0].id = "esriLogo";
+            }
+            else if (dojo.query('.logo-sm', dojo.byId('map')).length > 0) {
+                dojo.query('.logo-sm', dojo.byId('map'))[0].id = "esriLogo";
+            }
+            dojo.addClass("esriLogo", "esriLogo");
+            dojo.byId('divSplashScreenContainer').style.display = "block";
+            dojo.replaceClass("divSplashScreenContent", "showContainer", "hideContainer");
+            SetHeightSplashScreen();
+            if (!isMobileDevice) {
+                CreateDataLayOut();
+                CreateOfficeDataLayOut();
+            }
+            else {
+                SetHeightAddressResults();
+                SetHeightComments();
+                SetHeightViewDetails();
+                SetHeightViewDirections();
+                SetHeightCmtControls();
+            }
+
+            dojo.byId("esriLogo").style.bottom = "10px";
+
+            var precinctLayer1 = new esri.layers.FeatureLayer(precinctLayer.ServiceUrl, {
+                mode: esri.layers.FeatureLayer.MODE_SELECTION,
+                displayOnPan: isBrowser ? false : true,
+                outFields: ["*"]
+            });
+
+            precinctLayer1.id = precinctLayerId;
+            if (precinctLayer.UseColor) {
+                var precinctSymbol = new esri.symbol.SimpleFillSymbol();
+                var precinctfillColor = new dojo.Color(precinctLayer.Color);
+                precinctfillColor.a = precinctLayer.Alpha;
+                precinctSymbol.setColor(precinctfillColor);
+                var precinctRenderer = new esri.renderer.SimpleRenderer(precinctSymbol);
+                precinctLayer1.setRenderer(precinctRenderer);
+            }
+
+
+            var officeLayer = new esri.layers.FeatureLayer(precinctOfficeLayer, {
+                mode: esri.layers.FeatureLayer.MODE_SELECTION,
+                outFields: ["*"]
+            });
+            officeLayer.id = 'precinctOfficeLayerId';
+
+            map.addLayer(precinctLayer1);
+            map.addLayer(officeLayer);
+
+            var gLayer = new esri.layers.GraphicsLayer({ displayOnPan: isBrowser ? false : true });
+            gLayer.id = tempGraphicsLayerId;
+            map.addLayer(gLayer);
+
+            var pollLayer1 = new esri.layers.FeatureLayer(isBrowser ? pollLayer.ServiceUrl : pollMobileLayer.ServiceUrl, {
+                mode: esri.layers.FeatureLayer.MODE_SNAPSHOT,
+                displayOnPan: isBrowser ? true : true,
+                outFields: ["*"]
+            });
+
+            pollLayer1.id = pollLayerId;
+            if (isBrowser) {
+                if (pollLayer.UseImage) {
+                    var pictureSymbol = new esri.symbol.PictureMarkerSymbol(pollLayer.Image, 25, 25);
+                    var pollingPlaceRenderer = new esri.renderer.SimpleRenderer(pictureSymbol);
+                    pollLayer1.setRenderer(pollingPlaceRenderer);
+                }
+            }
+            else {
+                if (pollMobileLayer.UseImage) {
+                    var pictureSymbol = new esri.symbol.PictureMarkerSymbol(pollMobileLayer.Image, 25, 25);
+                    var pollingPlaceRenderer = new esri.renderer.SimpleRenderer(pictureSymbol);
+                    pollLayer1.setRenderer(pollingPlaceRenderer);
+                }
+            }
+
+
+            var gLayer = new esri.layers.GraphicsLayer({ displayOnPan: isBrowser ? false : true });
+            gLayer.id = highlightPollLayerId;
+            map.addLayer(gLayer);
+
+            var gLayer = new esri.layers.GraphicsLayer({ displayOnPan: isBrowser ? false : true });
+            gLayer.id = routeGraphicsLayerId;
+            map.addLayer(gLayer);
+
+            dojo.connect(pollLayer1, "onUpdateEnd", function (err) {
+                HideProgressIndicator();
+                if (err) {
+                    alert(err.message);
+                    return;
+                }
+                dojo.disconnect(this);
+            });
+
+            dojo.connect(pollLayer1, "onClick", function (evtArgs) {
+                ShowServiceInfoDetails(evtArgs.graphic.geometry, evtArgs.graphic.attributes);
+                evtArgs = (evtArgs) ? evtArgs : event;
+                evtArgs.cancelBubble = true;
+                if (evtArgs.stopPropagation) {
+                    evtArgs.stopPropagation();
+                }
+                if (!isMobileDevice) {
+                    ShowPollingPlaceDetails();
+                }
+            });
+            map.addLayer(pollLayer1);
+
+            var pollingCommentsLayer1 = new esri.layers.FeatureLayer(pollingCommentsLayer, {
+                mode: esri.layers.FeatureLayer.MODE_SELECTION,
+                outFields: ["*"],
+                id: pollingCommentsLayerId,
+                displayOnPan: isBrowser ? false : true
+            });
+            map.addLayer(pollingCommentsLayer1);
+
+            dojo.byId("txtComments").onfocus = function () {
+                CreateScrollbar(dojo.byId("divCmtIpContainer"), dojo.byId("divCmtIpContent"));
+            };
+
+            if (referenceOverlayLayer.DisplayOnLoad) {
+                var overlaymap = new esri.layers.ArcGISTiledMapServiceLayer(referenceOverlayLayer.ServiceUrl);
+                map.addLayer(overlaymap);
+            }
+
+            if (!isMobileDevice) {
+                window.onresize = function () {
+                    resizeHandler();
+                    setTimeout(function () {
+                        dojo.disconnect(handlePoll);
+                        dojo.disconnect(handleElected);
+                        CreateHorizontalScrollbar(dojo.byId("divOfficeData"), dojo.byId("carouselOfficescroll"));
+                        CreateHorizontalScrollbar(dojo.byId("divPollingData"), dojo.byId("carouselscroll"));
+                    }, 300);
+                    ResetSlideControls();
+                }
+            }
+        }
+
+        //function for displaying polling details at bottom panel
+        function ShowPollingPlaceDetails() {
+            if (mapPoint) {
+                if (!noRoute) {
+                    dojo.byId('divPollingPlaceDetailsHeader').className = "divSelectedHeader";
+                    dojo.byId('divElectedOfficialsHeader').className = "divDefaultHeader";
+
+                    dojo.byId('divPollingPlaceDetailsHeader').style.cursor = "default";
+                    dojo.byId('divElectedOfficialsHeader').style.cursor = "pointer";
+                    dojo.byId("imgToggleResults").style.cursor = "pointer";
+
+                    dojo.byId('divGradient').style.display = 'none';
+                    dojo.byId('divPollingDetails').style.display = "block";
+
+                    ResetSlideControls();
+
+
+
+
+                    if (dojo.byId("divSegmentContent")) {
+                        CreateDirectionsScrollBar();
+                    }
+                    for (var index in pollingPlaceData) {
+                        if (pollingPlaceData[index].ShowDirection) {
+                            continue;
+                        }
+                        CreatePollingDetailsScrollBar("div" + index + "container", "div" + index + "content");
+                    }
+                    dojo.disconnect(handlePoll);
+                    dojo.disconnect(handleElected);
+                    CreateHorizontalScrollbar(dojo.byId("divPollingData"), dojo.byId("carouselscroll"));
+
+                    //                    for (var index in pollingPlaceData) {
+                    //                        dojo.byId("div" + index + "container").className = "style";
+                    //                    }
+                }
+            }
+            else {
+                ClearSelection();
+            }
+        }
+
+        //function for clearing the data at ottom panel
+        function ClearSelection() {
+            dojo.byId('divPollingPlaceDetailsHeader').className = "divDefaultHeader";
+            dojo.byId('divElectedOfficialsHeader').className = "divDefaultHeader";
+            dojo.byId('divPollingPlaceDetailsHeader').style.cursor = "default";
+            dojo.byId('divElectedOfficialsHeader').style.cursor = "default";
+            dojo.byId("imgToggleResults").style.cursor = "default";
+            dojo.byId('imgToggleResults').title = "";
+        }
+
+        //function for displaying the data for elected officials at bottom panel
+        function ElectedOfficials() {
+            if (mapPoint) {
+                if (!noRoute) {
+                    dojo.byId('divElectedOfficialsHeader').className = "divSelectedHeader";
+                    dojo.byId('divPollingPlaceDetailsHeader').className = "divDefaultHeader";
+
+                    dojo.byId('divPollingPlaceDetailsHeader').style.cursor = "pointer";
+                    dojo.byId('divElectedOfficialsHeader').style.cursor = "default";
+                    dojo.byId("imgToggleResults").style.cursor = "pointer";
+
+                    dojo.byId('divPollingDetails').style.display = "none";
+                    dojo.byId('divGradient').style.display = 'block';
+
+                    ResetSlideControls();
+
+                    dojo.disconnect(handlePoll);
+                    dojo.disconnect(handleElected);
+                    CreateHorizontalScrollbar(dojo.byId("divOfficeData"), dojo.byId("carouselOfficescroll"));
+                }
+            }
+            else {
+                ClearSelection();
+            }
+        }
+
+        //function for creating a layout for polling data at bottom panel
+        function CreateDataLayOut() {
+            RemoveChildren(dojo.byId('divPollingPlaceDataContainer'));
+            var i = 0;
+            var tableHeader = document.createElement("table");
+            var tbodyHeader = document.createElement("tbody");
+            tableHeader.appendChild(tbodyHeader);
+            var tr = document.createElement("tr");
+            tbodyHeader.appendChild(tr);
+            for (var index in pollingPlaceData) {
+                var td = document.createElement("td");
+                var templateNode = dojo.byId('divTemplate');
+                var dataContainerNode = templateNode.cloneNode(true);
+                dataContainerNode.style.display = "block";
+                dataContainerNode.id = "div" + index;
+                dataContainerNode.style.width = infoBoxWidth + "px";
+                var divDataHeader = dojo.query(".divDetailsHeader", dataContainerNode)[0];
+
+                var spanHeader = dojo.query(".spanHeader", divDataHeader)[0];
+                var value;
+                if (pollingPlaceData[index].Title.length > 0) {
+                    if (isBrowser) {
+                        value = pollingPlaceData[index].Title.trim();
+                        value = value.trimString(Math.round(infoBoxWidth / 7));
+                        if (value.length > Math.round(infoBoxWidth / 7)) {
+                            spanHeader.title = pollingPlaceData[index].Title;
+                        }
+                    }
+                    else if (isTablet) {
+                        value = pollingPlaceData[index].Title.trim();
+                        value = value.trimString(Math.round(infoBoxWidth / 9));
+                    }
+                }
+                spanHeader.innerHTML = value;
+                divDataHeader.style.backgroundColor = pollingPlaceData[index].HeaderColor;
+                divDataHeader.style.borderBottom = "gray 1px solid";
+                var divDataContent = dojo.query(".divContentStyle", dataContainerNode);
+                divDataContent[0].id = "div" + index + "container";
+                divDataContent[1].id = "div" + index + "content";
+
+                td.appendChild(dataContainerNode);
+                tr.appendChild(td);
+            }
+            dojo.byId('divPollingPlaceDataContainer').appendChild(tableHeader);
+        }
+
+        //function for creating a layout for elected data at bottom panel
+        function CreateOfficeDataLayOut() {
+            RemoveChildren(dojo.byId('divOfficeDataContainer'));
+            var i = 0;
+            var tableHeader = document.createElement("table");
+            var tbodyHeader = document.createElement("tbody");
+            tableHeader.appendChild(tbodyHeader);
+            var tr = document.createElement("tr");
+            tbodyHeader.appendChild(tr);
+            for (var index in electedOfficialsTabData) {
+                var td = document.createElement("td");
+                var templateNode = dojo.byId('divTemplate');
+                var dataContainerNode = templateNode.cloneNode(true);
+                dataContainerNode.style.display = "block";
+                dataContainerNode.id = "div" + index;
+                dataContainerNode.style.width = infoBoxWidth + "px";
+
+                var divDataHeader = dojo.query(".divDetailsHeader", dataContainerNode)[0];
+                var spanHeader = dojo.query(".spanHeader", divDataHeader)[0];
+                var value;
+                if (electedOfficialsTabData[index].Title.length > 0) {
+                    if (isBrowser) {
+                        value = electedOfficialsTabData[index].Title.trim();
+                        value = value.trimString(Math.round(infoBoxWidth / 7));
+                        if (value.length > Math.round(infoBoxWidth / 7)) {
+                            spanHeader.title = electedOfficialsTabData[index].Title;
+                        }
+                    }
+                    else if (isTablet) {
+                        value = electedOfficialsTabData[index].Title.trim();
+                        value = value.trimString(Math.round(infoBoxWidth / 9));
+                    }
+                }
+                spanHeader.innerHTML = value;
+                divDataHeader.style.backgroundColor = electedOfficialsTabData[index].HeaderColor;
+                divDataHeader.style.borderBottom = "gray 1px solid";
+                var divDataContent = dojo.query(".divContentStyle", dataContainerNode);
+                divDataContent[0].id = "div" + index + "container";
+                divDataContent[1].id = "div" + index + "content";
+
+                td.appendChild(dataContainerNode);
+                tr.appendChild(td);
+            }
+            dojo.byId('divOfficeDataContainer').appendChild(tableHeader);
+        }
+
+        dojo.addOnLoad(init);
+    </script>
+</head>
+<body onorientationchange="orientationChanged();">
+    <div id="divMainContainer" style="width: 100%; height: 100%;" dojotype="dojox.mobile.View"
+        selected="true">
+        <div id="map" style="width: 100%; height: 100%;">
+        </div>
+    </div>
+    <div id="divSplashScreenContainer" class="divSplashScreenContainer" style="display: none;">
+        <table style="width: 100%; height: 100%;">
+            <tr align="center" valign="middle">
+                <td>
+                    <div id="divSplashScreenContent" class="hideContainer divSplashScreenContent">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td>
+                                    <div id="divSplashContainer" class="divSplashContainer" style="margin-top: 10px;">
+                                        <div id="divSplashContent" class="divSplashContent">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="center">
+                                    <div style="width: 75px; margin-top: 10px" class="customButton" onclick="HideSplashScreenMessage();">
+                                        <div class="customButtonInner">
+                                            <table style="width: 100%; height: 100%;">
+                                                <tr>
+                                                    <td align="center" valign="middle">
+                                                        OK
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="divLogo" class="divLogo">
+        <table style="width: 100%; height: 100%;">
+            <tr>
+                <td>
+                    <img id="imgApp" class="imgApp" />
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="divApplicationHeader" align="right">
+        <table cellpadding="0" cellspacing="0" class="tableHeader">
+            <tr>
+                <td id="lblAppName" class="lblAppName" align="left">
+                </td>
+                <td align="right">
+                    <table>
+                        <tr>
+                            <td align="center" id="Td1" class="tdHeader">
+                                <img alt="Settings" src="images/locate.png" class="imgOptions" title="Search" onclick="ShowLocateContainer();"
+                                    style="cursor: pointer" />
+                            </td>
+                            <td align="center" id="tdGeolocation" class="tdHeader">
+                                <img alt="Settings" src="images/imgGeolocation.png" class="imgOptions" title="Locate"
+                                    onclick="ShowMyLocation();" style="cursor: pointer" />
+                            </td>
+                            <td align="center" id="tdBaseMap">
+                            </td>
+                            <td align="center" class="tdHeader">
+                                <img src="images/imgSocialMedia.png" class="imgOptions" title="Share" onclick="ShareLink(true);"
+                                    style="cursor: pointer" />
+                            </td>
+                            <td align="center" id="help" class="tdHeader">
+                                <img src="images/help.png" title="Help" id="imgHelp" class="imgOptions" style="cursor: pointer" />
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="divAddressContainer" align="center" class="divAddressContainer hideContainerHeight"
+        style="display: none">
+        <table style="width: 100%; height: 100%;">
+            <tr align="center" valign="middle">
+                <td>
+                    <div id="divAddressHolder" class="hideContainerHeight divAddressHolder">
+                        <div id="divAddressContent" class="divAddressContent">
+                            <table class="tblHeader" style="width: 100%;">
+                                <tr style="height: 30px;" align="center" valign="top">
+                                    <td class="tdHeader" align="left" valign="middle" style="padding-left: 8px;">
+                                        Search Address
+                                    </td>
+                                    <td style="width: 10%;" align="right">
+                                        <img src="images/close.png" class="imgOptions" title="Close" style="cursor: pointer;
+                                            padding: 0px" onclick="HideAddressContainer();" />
+                                    </td>
+                                </tr>
+                            </table>
+                            <div id="divAddressResultContainer" style="margin: 5px;">
+                                <table style="color: #fff; width: 100%;">
+                                    <tr>
+                                        <td>
+                                            <div id="divAddressPlaceHolder" class="divAddressPlaceHolder" align="left">
+                                                <input type="text" id="txtAddress" class="txtAddress" onfocus="if(this.setSelectionRange)this.setSelectionRange(this.value.length, this.value.length);" />
+                                                <img src="images/locate.png" id="imgLocate" class="imgLocate" style="cursor: pointer"
+                                                    title="Locate" onclick="LocateAddress();" />
+                                            </div>
+                                            <div id="divAddressList" class="divAddressList">
+                                                <div id="divAddressScrollContainer" class="divAddressScrollContainer" align="left">
+                                                    <div id="divAddressScrollContent" class="divAddressScrollContent">
+                                                        <table id="tblAddressResults" cellpadding="0" cellspacing="2" style="width: 100%;">
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="divLayerContainer" class="divLayerContainer hideContainerHeight">
+        <div id="divLayerHolder" class="divLayerHolder">
+            <div id="divLayerContentHolder" class="divLayerContentHolder">
+                <div id="layerList">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divAppContainer" class="divAppContainer hideContainerHeight">
+        <div id="divAppHolder" class="divAppHolder">
+            <div id="divAppContent">
+                <table cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td>
+                            <table cellpadding="2" cellspacing="2">
+                                <tr>
+                                    <td align="center" colspan="3" style="color: white;">
+                                        Share this map
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 30px;" align="center" id="tdFacebook">
+                                        <img title="Facebook" class="imgShare" id="imgFacebook" src="images/img_facebook.png"
+                                            onclick="Share('facebook')" />
+                                    </td>
+                                    <td style="width: 30px;" align="center" id="tdTwitter">
+                                        <img title="Twitter" class="imgShare" id="imgTwitter" src="images/img_twitter.png"
+                                            onclick="Share('twitter')" />
+                                    </td>
+                                    <td style="width: 30px;" align="center" id="tdMail">
+                                        <img title="Email" class="imgShare" id="imgMail" src="images/img_email.png" onclick="Share('mail')" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="showHide" class="showHide" style="bottom: 0px">
+        <table cellpadding="0" cellspacing="0" style="margin-left: 45px;">
+            <tr>
+                <td>
+                    <table cellpadding="0" cellspacing="0" style="height: 100%;">
+                        <tr>
+                            <td>
+                                <div id="divPollingPlaceDetailsHeader" align="center" class="divDefaultHeader" onclick="ShowPollingPlaceDetails();"
+                                    style="display: none;">
+                                    <table style="height: 100%; width: 160px;">
+                                        <tr>
+                                            <td>
+                                                Polling Place
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+                            <td style="width: 5px;">
+                            </td>
+                            <td>
+                                <div id="divElectedOfficialsHeader" class="divDefaultHeader" onclick="ElectedOfficials();"
+                                    style="display: none;">
+                                    <table style="height: 100%; width: 160px;">
+                                        <tr>
+                                            <td>
+                                                Elected Officials
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width: 5px;">
+                </td>
+                <td align="right">
+                    <div id="divImageBackground" class="divShowHeader" style="display: none;">
+                        <div id="divImage">
+                            <table style="width: 40px; height: 100%">
+                                <tr>
+                                    <td align="center">
+                                        <img id="imgToggleResults" state="minimized" class="imgShare" src="images/up.png"
+                                            style="cursor: pointer;" onclick="ShowHideResult(this);" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="divGradient" class="divGradient hideBottomContainerHeight">
+        <div class="transparentBackground" style="height: 200px">
+            <table style="width: 100%; height: 100%;">
+                <tr>
+                    <td align="left" style="width: 37px;">
+                        <div id="OfficeLeftArrow" style="z-index: 1000; display: none;">
+                            <img src="images/arrLeft.png" style="cursor: pointer; vertical-align: middle;" onclick="SlideOfficeLeft();"
+                                class="imgShare" />
+                        </div>
+                    </td>
+                    <td>
+                        <div id="divOfficeData" class="divOfficeData">
+                            <div id="carouselOfficescroll" class="carouselOfficescroll">
+                                <div id="divOfficeDataContainer" style="padding-top: 5px;">
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td align="right" style="width: 37px;">
+                        <div id="OfficeRightArrow" style="z-index: 1000; display: block">
+                            <img src="images/arrRight.png" style="cursor: pointer; vertical-align: middle;" onclick="SlideOfficeRight();"
+                                class="imgShare" />
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="divPollingDetails" class="divPollingDetails hideBottomContainerHeight">
+        <div class="transparentBackground" style="height: 200px">
+            <table style="width: 100%; height: 100%;">
+                <tr>
+                    <td align="left" style="width: 37px;">
+                        <div id="PollingLeftArrow" style="z-index: 1000; display: none;">
+                            <img src="images/arrLeft.png" style="cursor: pointer; vertical-align: middle;" onclick="SlideLeft();"
+                                class="imgShare" />
+                        </div>
+                    </td>
+                    <td>
+                        <div id="divPollingData" class="divPollingData">
+                            <div id="carouselscroll" class="carouselscroll">
+                                <div id="divPollingPlaceDataContainer" style="padding-top: 5px;">
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td align="right" style="width: 37px;">
+                        <div id="PollingRightArrow" style="z-index: 1000; display: block">
+                            <img src="images/arrRight.png" style="cursor: pointer; vertical-align: middle;" onclick="SlideRight();"
+                                class="imgShare" />
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id='divTemplate' class='divDetails'>
+        <div id="divDetailsHeader" class='divDetailsHeader' style="width: 100%; position: relative;">
+            <table style="height: 100%; width: 100%">
+                <tr>
+                    <td>
+                        <span class="spanHeader"></span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class='divContentStyle'>
+            <div class='divContentStyle'>
+            </div>
+        </div>
+    </div>
+    <div id="divInfoContainer" align="center" class="divInfoContainer opacityHideAnimation">
+        <table style="width: 100%; height: 100%;">
+            <tr align="center" valign="middle">
+                <td>
+                    <div align="left" id="divInfoContent" class="hideContainer divInfoContent">
+                        <table id="tblHeader" class="infotblHeader" style="width: 100%; padding: 1px" cellpadding="0"
+                            cellspacing="0">
+                            <tr style="height: 30px;" align="center" valign="top">
+                                <td align="left" id="tdLabel" valign="middle" style="padding-left: 7px; width: 98%">
+                                    <span id="tdInfoHeader" class="tdInfoHeader"></span>
+                                </td>
+                                <td id="tdImages">
+                                    <table cellpadding="0" cellspacing="0" align="right">
+                                        <tr>
+                                            <td id="tdDirections" align="right">
+                                                <img class="infoOptions" id="imgDirections" onclick="ShowInfoDirectionsView();" />
+                                            </td>
+                                            <td id="tdComments" align="right">
+                                                <img src="images/comments.png" class="infoOptions" title="Comments" id="imgComments"
+                                                    onclick="ShowCommentsView();" />
+                                            </td>
+                                            <td align="right">
+                                                <img src="images/close.png" class="infoOptions" title="Close" style="cursor: pointer;"
+                                                    onclick="HideInfoContainer();" />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                        <div id="divInfoDetails" class="divInfoDetails" style="color: #fff;">
+                            <div id="divInfoDetailsScroll" class="divInfoDetailsScroll">
+                                <table id="tblInfoDetails" cellpadding="0" style="width: 100%; padding-top: 5px;
+                                    padding-left: 2px">
+                                </table>
+                            </div>
+                        </div>
+                        <div id="divInfoDirections" class="divInfoDirections">
+                            <div id="divInfoDirectionsScroll" class="divInfoDirectionsScroll">
+                            </div>
+                        </div>
+                        <div id="divInfoComments" class="divInfoComments" style="color: #fff; display: none;">
+                            <div id="divCommentsHeader" style="margin-top: 10px; margin-right: 10px; border-bottom: #A5A5A5 2px solid;
+                                height: 20px;">
+                                Comments
+                            </div>
+                            <div align="left" id="divCommentsView">
+                                <table style="height: 35px; cursor: pointer;" onclick="ShowAddCommentsView();">
+                                    <tr align="left">
+                                        <td style="width: 37px;">
+                                            <img title="" src="images/addcomment.png" class="imgOptions">
+                                        </td>
+                                        <td>
+                                            Add Comment
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div id="divCommentsList">
+                                <div id="divCommentsContainer" class="divCommentsContainer">
+                                    <div id="divCommentsContent" class="divCommentsContent" style="overflow: hidden">
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="divAddComment" style="display: none; margin: 5px;">
+                                <div id="divCmtIpContainer" style="position: relative; overflow: hidden;">
+                                    <div id="divCmtIpContent" style="position: absolute; overflow: hidden; width: 95%">
+                                        <table id="tblComment" style="margin-left: 7px; margin-top: 15px;" cellpadding="0"
+                                            cellspacing="0">
+                                            <tr valign="top">
+                                                <td>
+                                                    <textarea placeholder="Enter comment" maxlength="250" class="txtArea" id="txtComments"
+                                                        onkeypress="if(dojo.isIE){return imposeMaxLength(this, 249);}else{return imposeMaxLength(this, 250);}"></textarea>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="4" valign="middle" align="center" style="height: 20px;">
+                                                    <span id="commentError" style="display: none; color: Yellow; margin-top: 3px; word-wrap: break-word;">
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td align="center" colspan="4">
+                                                    <table>
+                                                        <tr>
+                                                            <td>
+                                                                <div style="width: 75px;" class="customButton" id="btnAddComments" onclick="AddComment();">
+                                                                    <div class="customButtonInner">
+                                                                        <table style="width: 100%; height: 100%;">
+                                                                            <tr>
+                                                                                <td align="center" valign="middle">
+                                                                                    Submit
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div style="width: 75px;" class="customButton" onclick="ResetCommentValues();">
+                                                                    <div class="customButtonInner">
+                                                                        <table style="width: 100%; height: 100%;">
+                                                                            <tr>
+                                                                                <td align="center" valign="middle">
+                                                                                    Cancel
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="divLoadingIndicator" class="divLoadingIndicator" style="display: block;">
+        <table style="width: 100%; height: 100%;">
+            <tr align="center" valign="middle">
+                <td>
+                    <img src="images/loader.gif" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

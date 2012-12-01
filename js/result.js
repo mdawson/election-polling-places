@@ -1,0 +1,467 @@
+﻿/** @license
+ | Version 10.1.1
+ | Copyright 2012 Esri
+ |
+ | Licensed under the Apache License, Version 2.0 (the "License");
+ | you may not use this file except in compliance with the License.
+ | You may obtain a copy of the License at
+ |
+ |    http://www.apache.org/licenses/LICENSE-2.0
+ |
+ | Unless required by applicable law or agreed to in writing, software
+ | distributed under the License is distributed on an "AS IS" BASIS,
+ | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ | See the License for the specific language governing permissions and
+ | limitations under the License.
+ */
+//function to display the result panel
+function ShowHideResult(imgToggle) {
+    if (!noRoute) {
+        if (pollPoint) {
+            if (imgToggle.getAttribute("state") == "minimized") {
+                imgToggle.setAttribute("state", "maximized");
+                if (dojo.byId('divPollingPlaceDetailsHeader').className || dojo.byId('divElectedOfficialsHeader').className == "divSelectedHeader") {
+                    if (dojo.byId('imgToggleResults').title) {
+                        WipeInResults();
+                    }
+                }
+                dojo.byId('imgToggleResults').src = "images/down.png";
+                dojo.byId('imgToggleResults').title = "Hide Panel";
+                // maximize
+            }
+            else {
+                imgToggle.setAttribute("state", "minimized");
+                WipeOutResults();
+                dojo.byId('imgToggleResults').src = "images/up.png";
+                if (dojo.byId('divPollingPlaceDetailsHeader').className || dojo.byId('divElectedOfficialsHeader').className == "divSelectedHeader") {
+                    dojo.byId('imgToggleResults').title = "Show Panel";
+                }
+                //minimize
+            }
+        }
+    }
+}
+
+//function for wiping in bottom panel
+function WipeInResults() {
+    dojo.byId("imgToggleResults").style.cursor = "pointer";
+    dojo.byId("esriLogo").style.bottom = "210px";
+    dojo.byId('showHide').style.bottom = "200px";
+    dojo.byId('divGradient').style.height = "200px";
+    dojo.byId('divPollingDetails').style.height = "200px";
+    dojo.replaceClass("divPollingDetails", "hideBottomContainer", "showBottomContainer");
+    dojo.replaceClass("divGradient", "hideBottomContainer", "showBottomContainer");
+}
+
+//function for wiping out bottom panel
+function WipeOutResults() {
+    dojo.byId("esriLogo").style.bottom = "0px";
+    dojo.byId('showHide').style.bottom = "0px";
+    dojo.byId('divGradient').style.height = "0px";
+    dojo.byId('divPollingDetails').style.height = "0px";
+    dojo.replaceClass("divPollingDetails", "showBottomContainer", "hideBottomContainer");
+    dojo.replaceClass("divGradient", "showBottomContainer", "hideBottomContainer");
+}
+
+//function to show the elected officials data
+function ShowElectedOffialInfo(attributes, electedOfficialsTabData, index, fields, aliases) {
+
+    var divContainer = dojo.byId("div" + index + "content");
+    RemoveChildren(divContainer);
+
+    divContainer.style.overflow = "hidden";
+    divContainer.style.height = "144px";
+
+    var table = document.createElement("table");
+    table.style.width = "95%";
+    table.cellSpacing = 2;
+    table.cellPadding = 0;
+    table.style.paddingTop = "5px";
+    table.style.paddingLeft = "5px";
+    var tbody = document.createElement("tbody");
+    table.appendChild(tbody);
+
+    for (var key = 0; key < electedOfficialsTabData[index].Data.length; key++) {
+        var tr = document.createElement("tr");
+        tbody.appendChild(tr);
+
+        var td1 = document.createElement("td");
+        td1.style.verticalAlign = "top";
+        td1.style.height = "20px";
+        if (electedOfficialsTabData[index].Data[key].DisplayText) {
+            td1.innerHTML = '<a>' + electedOfficialsTabData[index].Data[key].DisplayText + '</a>';
+        }
+        else {
+            for (var m = 0; m < fields.length; m++) {
+                if ("${" + fields[m].name + "}" == electedOfficialsTabData[index].Data[key].FieldName.split(",")[0]) {
+                    td1.innerHTML = aliases[fields[m].name] + ':';
+                    break;
+                }
+            }
+        }
+
+        var td2 = document.createElement("td");
+        td2.style.verticalAlign = "top";
+        td2.style.height = "20px";
+        td2.style.paddingLeft = "5px";
+        td2.className = "tdBreak";
+        if (dojo.string.substitute(electedOfficialsTabData[index].Data[key].FieldName, attributes)) {
+            if ((dojo.string.substitute(electedOfficialsTabData[index].Data[key].FieldName, attributes)).match("http:" || "https:")) {
+                td2.innerHTML = "<u style='cursor:pointer'>More info</u>";
+                td2.title = dojo.string.substitute(electedOfficialsTabData[index].Data[key].FieldName, attributes);
+                td2.style.wordBreak = "break-all";
+                td2.setAttribute("link", dojo.string.substitute(electedOfficialsTabData[index].Data[key].FieldName, attributes));
+                td2.onclick = function () {
+                    window.open(this.getAttribute("link"));
+                }
+            }
+            else {
+                td2.innerHTML = dojo.string.substitute(electedOfficialsTabData[index].Data[key].FieldName, attributes);
+            }
+        }
+        else {
+            td2.innerHTML = showNullValueAs;
+        }
+
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        tbody.appendChild(tr);
+        divContainer.appendChild(table);
+
+    }
+    CreatePollingDetailsScrollBar("div" + index + "container", "div" + index + "content");
+}
+
+//function for map click event
+function FindLocation(evt) {
+    HideAddressContainer();
+    noRoute = false;
+    ShowProgressIndicator();
+    if (!isMobileDevice) {
+        for (var index in electedOfficialsTabData) {
+            if (electedOfficialsTabData[index]) {
+                RemoveChildren(dojo.byId('div' + index + 'content'));
+            }
+        }
+    }
+
+    map.getLayer(routeGraphicsLayerId).clear();
+    map.getLayer(highlightPollLayerId).clear();
+    ClearGraphics();
+    map.infoWindow.hide();
+    mapPoint = evt.mapPoint;
+
+    var locator2 = new esri.tasks.Locator(locatorURL);
+    locator2.locationToAddress(evt.mapPoint, 100);
+    dojo.connect(locator2, "onLocationToAddressComplete", function (candidate) {
+        if (candidate.address) {
+            var symbol = new esri.symbol.PictureMarkerSymbol(locatorMarkupSymbolPath, 25, 25);
+            var attr = [];
+            if (candidate.address.Loc_name == "US_Zipcode") {
+                attr = { Address: candidate.address.Zip };
+            }
+            else {
+                var address = [];
+                var fields = "Address,City,State,Zip";
+                for (var att = 0; att < fields.split(",").length; att++) {
+                    if (candidate.address[fields.split(",")[att]]) {
+                        address.push(candidate.address[fields.split(",")[att]]);
+                    }
+                }
+                attr = { Address: address.join(',') };
+            }
+
+            var graphic = new esri.Graphic(mapPoint, symbol, attr, null);
+            map.getLayer(tempGraphicsLayerId).add(graphic);
+        }
+    });
+    FindPrecinctLayer();
+
+    if (!isMobileDevice) {
+        ShowPollingPlaceDetails();
+        for (var index in electedOfficialsTabData) {
+            GetOfficeName(electedOfficialsTabData[index].ServiceUrl, electedOfficialsTabData[index].Data, index);
+        }
+    }
+
+}
+
+//function to get the name of the Layer from Config
+function GetOfficeName(officeURL, officeData, index) {
+    queryTask = new esri.tasks.QueryTask(electedOfficialsTabData[index].ServiceUrl);
+    var queryCounty = new esri.tasks.Query();
+    queryCounty.geometry = mapPoint;
+    queryCounty.returnGeometry = false;
+    queryCounty.outFields = ["*"];
+    queryCounty.spatialRelationship = esri.tasks.Query.SPATIAL_REL_WITHIN;
+    queryTask.execute(queryCounty, function (features) {
+        if (features.features.length > 0) {
+            ShowElectedOffialInfo(features.features[0].attributes, electedOfficialsTabData, index, features.fields, features.fieldAliases);
+        }
+    }
+    );
+}
+
+//function to query precinct layer
+function FindPrecinctLayer() {
+    selectedPollPoint = null;
+    map.getLayer(highlightPollLayerId).clear();
+    var query = new esri.tasks.Query();
+    query.geometry = mapPoint;
+    query.spatialRelationship = esri.tasks.Query.SPATIAL_REL_WITHIN;
+    map.getLayer(precinctLayerId).selectFeatures(query, esri.layers.FeatureLayer.SELECTION_NEW, function (features) {
+        if (features.length > 0) {
+            setTimeout(function () {
+                map.setExtent(features[0].geometry.getExtent().expand(3));
+            }, 100);
+            GetpollingId(features);
+        }
+        else {
+            pollPoint = null;
+            mapPoint = null;
+            HideProgressIndicator();
+            map.infoWindow.hide();
+            ClearSelection();
+            ClearGraphics();
+            ShowInfoDetailsView();
+            map.getLayer(routeGraphicsLayerId).clear();
+            noRoute = true;
+            if (!isMobileDevice) {
+                var imgToggle = dojo.byId('imgToggleResults');
+                if (imgToggle.getAttribute("state") == "maximized") {
+                    imgToggle.setAttribute("state", "minimized");
+                    WipeOutResults();
+                    dojo.byId('imgToggleResults').src = "images/up.png";
+                }
+            }
+            alert(messages.getElementsByTagName("noPollingPlaces")[0].childNodes[0].nodeValue);
+        }
+    });
+}
+
+//function to get the PollingID
+function GetpollingId(features) {
+    // Save the precinct attributes
+    var precinctAttrs = features[0].attributes;
+
+    var queryTable = new esri.tasks.Query();
+    queryTable.where = "PRECINCTID  = '" + features[0].attributes.PRECINCTID + "'";
+    queryTable.outFields = ["POLLINGID"];
+    map.getLayer(precinctOfficeLayerId).queryFeatures(queryTable, function (features) {
+        if (features.features.length > 0) {
+            GetDesignatedPollingPlace(features, precinctAttrs);
+        }
+        else {
+            selectedPollPoint = null;
+            pollPoint = null;
+            mapPoint = null;
+            HideProgressIndicator();
+            map.infoWindow.hide();
+            ClearSelection();
+            ShowInfoDetailsView();
+            map.getLayer(routeGraphicsLayerId).clear();
+            if (!isMobileDevice) {
+                var imgToggle = dojo.byId('imgToggleResults');
+                if (imgToggle.getAttribute("state") == "maximized") {
+                    imgToggle.setAttribute("state", "minimized");
+                    WipeOutResults();
+                    dojo.byId('imgToggleResults').src = "images/up.png";
+                }
+            }
+            alert(messages.getElementsByTagName("designatedPollingPlaces")[0].childNodes[0].nodeValue);
+        }
+    });
+}
+
+//function to get the Designated Polling Place
+function GetDesignatedPollingPlace(features, precinctAttrs) {
+    map.infoWindow.hide();
+    map.getLayer(highlightPollLayerId).clear();
+    map.getLayer(pollLayerId).clearSelection();
+    var queryPollingPlaces = new esri.tasks.Query();
+    queryPollingPlaces.where = "POLLINGID = '" + features.features[0].attributes["POLLINGID"] + "'";
+    map.getLayer(pollLayerId).selectFeatures(queryPollingPlaces, esri.layers.FeatureLayer.SELECTION_NEW, function (features) {
+        map.getLayer(highlightPollLayerId).clear();
+        map.getLayer(pollLayerId).clearSelection();
+        if (features.length > 0) {
+            desgFlag = true;
+            pollPoint = features[0].geometry;
+
+            devObjectId = features[0].attributes[map.getLayer(pollLayerId).objectIdField];
+            map.getLayer(pollLayerId).queryAttachmentInfos(devObjectId, GetAttachmentInfo, function (err) {
+                GetAttachmentInfo();
+            });
+
+            // Add the precinct display to the polling place
+            var amendedAttrs = dojo.clone(features[0].attributes);
+            amendedAttrs["_PrecinctAttributes"] = precinctAttrs;
+            ShowPollingPlace(null, amendedAttrs);
+
+            var symbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, locatorRippleSize, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([225, 0, 0, 0.75]), 4), new dojo.Color([0, 0, 0, 0]));
+            AddGraphic(map.getLayer(highlightPollLayerId), symbol, pollPoint);
+            if (isMobileDevice) {
+                ShowServiceInfoDetails(pollPoint, features[0].attributes);
+            }
+            storeAttr = dojo.string.substitute(infoWindowHeader, features[0].attributes);
+        }
+        if (!isMobileDevice) {
+            var imgToggle = dojo.byId('imgToggleResults');
+            if (imgToggle.getAttribute("state") == "minimized") {
+                imgToggle.setAttribute("state", "maximized");
+                dojo.byId('divPollingPlaceDetailsHeader').style.display = "block";
+                dojo.byId('divElectedOfficialsHeader').style.display = "block";
+                dojo.byId('divImageBackground').style.display = "block";
+                setTimeout(function () {
+                    if (dojo.byId('divPollingPlaceDetailsHeader').className || dojo.byId('divElectedOfficialsHeader').className == "divSelectedHeader") {
+                        if (dojo.byId('imgToggleResults').title) {
+                            dojo.byId("esriLogo").style.bottom = "210px";
+                            dojo.byId('showHide').style.bottom = "200px";
+                            dojo.byId('divGradient').style.height = "200px";
+                            dojo.byId('divPollingDetails').style.height = "200px";
+                            dojo.replaceClass("divPollingDetails", "hideBottomContainer", "showBottomContainer");
+                            dojo.replaceClass("divGradient", "hideBottomContainer", "showBottomContainer");
+                        }
+                    }
+                }, 500);
+                dojo.byId('imgToggleResults').src = "images/down.png";
+                dojo.byId('imgToggleResults').title = "Hide Panel";
+                // maximize
+            }
+        }
+    });
+}
+
+//sliding to the right
+function SlideRight() {
+    var difference = dojo.byId('divPollingData').offsetWidth - dojo.byId('carouselscroll').offsetWidth;
+    if (newLeft >= difference) {
+        dojo.byId('PollingLeftArrow').style.display = "block";
+        var node = dojo.byId('carouselscroll');
+        newLeft = newLeft - (infoBoxWidth + 5);
+
+        dojo.byId('carouselscroll').style.left = newLeft + "px";
+        dojo.addClass(dojo.byId('carouselscroll'), "slidePanel");
+
+        if (newLeft < difference) {
+            dojo.byId('PollingRightArrow').style.display = "none";
+        }
+        if (dojo.byId('PollingRightArrow').style.display == "none") {
+            dojo.byId('PollingLeftArrow').style.display = "block";
+        }
+    }
+    if (difference > 0) {
+        dojo.byId('PollingRightArrow').style.display = "none";
+    }
+}
+
+//sliding to the left
+function SlideLeft() {
+    var difference = dojo.byId('divPollingData').offsetWidth - dojo.byId('carouselscroll').offsetWidth;
+    if (newLeft < 0) {
+        if (newLeft > -(infoBoxWidth + 5)) {
+            newLeft = 0;
+        }
+        else {
+            newLeft = newLeft + (infoBoxWidth + 5);
+        }
+
+        dojo.byId('carouselscroll').style.left = newLeft + "px";
+        dojo.addClass(dojo.byId('carouselscroll'), "slidePanel");
+
+        if (dojo.byId('PollingRightArrow').style.display == "none") {
+            if (newLeft >= difference) {
+                dojo.byId('PollingRightArrow').style.display = "block";
+            }
+        }
+        if (newLeft == 0) {
+            dojo.byId('PollingLeftArrow').style.display = "none";
+        }
+    }
+}
+//sliding to the right
+function SlideOfficeRight() {
+    var difference = dojo.byId('divOfficeData').offsetWidth - dojo.byId('carouselOfficescroll').offsetWidth;
+    if (newLeftOffice >= difference) {
+        dojo.byId('OfficeLeftArrow').style.display = "block";
+        var node = dojo.byId('carouselOfficescroll');
+        newLeftOffice = newLeftOffice - (infoBoxWidth + 5);
+
+        dojo.byId('carouselOfficescroll').style.left = newLeftOffice + "px";
+        dojo.addClass(dojo.byId('carouselscroll'), "slidePanel");
+
+        if (newLeftOffice < difference) {
+            dojo.byId('OfficeRightArrow').style.display = "none";
+        }
+        if (dojo.byId('OfficeRightArrow').style.display == "none") {
+            dojo.byId('OfficeLeftArrow').style.display = "block";
+        }
+    }
+    if (difference > 0) {
+        dojo.byId('OfficeRightArrow').style.display = "none";
+    }
+}
+
+//sliding to the left
+function SlideOfficeLeft() {
+    var difference = dojo.byId('divOfficeData').offsetWidth - dojo.byId('carouselOfficescroll').offsetWidth;
+    if (newLeftOffice < 0) {
+        if (newLeftOffice > -(infoBoxWidth + 5)) {
+            newLeftOffice = 0;
+        }
+        else {
+            newLeftOffice = newLeftOffice + (infoBoxWidth + 5);
+        }
+        var node = dojo.byId('carouselOfficescroll');
+
+        dojo.byId('carouselOfficescroll').style.left = newLeftOffice + "px";
+        dojo.addClass(dojo.byId('carouselOfficescroll'), "slidePanel");
+
+        if (dojo.byId('OfficeRightArrow').style.display == "none") {
+            if (newLeftOffice >= difference) {
+                dojo.byId('OfficeRightArrow').style.display = "block";
+            }
+        }
+        if (newLeftOffice == 0) {
+            dojo.byId('OfficeLeftArrow').style.display = "none"
+        }
+    }
+}
+
+//function for reseting the slide controls
+function ResetSlideControls() {
+    if (newLeftOffice > dojo.byId("divOfficeData").offsetWidth - dojo.byId("carouselOfficescroll").offsetWidth) {
+        dojo.byId('OfficeRightArrow').style.display = "block";
+        dojo.byId('OfficeRightArrow').style.cursor = "pointer";
+    }
+    else {
+        dojo.byId('OfficeRightArrow').style.display = "none";
+        dojo.byId('OfficeRightArrow').style.cursor = "default";
+    }
+
+    if (newLeftOffice == 0) {
+        dojo.byId('OfficeLeftArrow').style.display = "none";
+        dojo.byId('OfficeLeftArrow').style.cursor = "defalut";
+    }
+    else {
+        dojo.byId('OfficeLeftArrow').style.display = "block";
+        dojo.byId('OfficeLeftArrow').style.cursor = "pointer";
+    }
+
+    if (newLeft > dojo.byId("divPollingData").offsetWidth - dojo.byId("carouselscroll").offsetWidth) {
+        dojo.byId('PollingRightArrow').style.display = "block";
+        dojo.byId('PollingRightArrow').style.cursor = "pointer";
+    }
+    else {
+        dojo.byId('PollingRightArrow').style.display = "none";
+        dojo.byId('PollingRightArrow').style.cursor = "default";
+    }
+
+    if (newLeft == 0) {
+        dojo.byId('PollingLeftArrow').style.display = "none";
+        dojo.byId('PollingLeftArrow').style.cursor = "defalut";
+    }
+    else {
+        dojo.byId('PollingLeftArrow').style.display = "block";
+        dojo.byId('PollingLeftArrow').style.cursor = "pointer";
+    }
+}
