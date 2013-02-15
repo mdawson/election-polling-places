@@ -81,5 +81,5 @@ limitations under the License.
 A copy of the license is available in the repository's
 [license.txt](https://raw.github.com/Esri/election-polling-places/master/license.txt) file.
 
-[](Esri Tags: Local Government election polling places)
+[](Esri Tags: Local Government Election Polling Places)
 [](Esri Language: JavaScript)
