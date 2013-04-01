@@ -1,5 +1,5 @@
 ﻿/*
- | Version 10.1.1
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -822,4 +822,11 @@ body, html
      background: rgba(0,0,0,0.65);
     -pie-background: rgba(0,0,0,0.65);
     behavior: url("styles/PIE.htc");
+}
+
+.imgSearchLoader
+{
+    vertical-align: middle;
+    display: none;
+    cursor: default;
 }

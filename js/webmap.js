@@ -1,5 +1,5 @@
 ﻿/** @license
- | Version 10.1.1
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,9 +33,9 @@ function getWebMapInfo(webmapUniqueKey, webmapId) {
                 url: url,
                 callbackParamName: "callback",
                 load: function (data) {
+                    webmapInfo.basemap = data.baseMap.baseMapLayers[0];
                     if (!webmapInfo.url) {
                         webmapInfo.operationalLayers = data.operationalLayers;
-                        //webmapInfo.layerInfo = data.operationalLayers[0].popupInfo;
                     }
                     else {
                         webmapInfo.layerInfo = data.layers;

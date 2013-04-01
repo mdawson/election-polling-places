@@ -1,5 +1,5 @@
 ﻿/*
- | Version 10.1.1
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -169,6 +169,7 @@ html, body
     {
       height: 44px !important;
       font-size: 15px !important;
+      font-family: Verdana !important;
       width: 85% !important;
       padding: 0px !important;
     }
@@ -181,7 +182,7 @@ html, body
 
 /* Landscape */
 
-@media screen and (min-width: 321px) and (max-width: 480px)
+@media screen and (min-width: 321px) and (max-width: 580px)
 {
 
    .txtArea
@@ -193,6 +194,7 @@ html, body
     {
       height: 44px !important;
       font-size: 15px !important;
+      font-family: Verdana !important;
       width: 90% !important;
       padding: 0px !important;
     }

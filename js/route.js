@@ -1,5 +1,5 @@
 /** @license
- | Version 10.1.1
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,6 +55,7 @@ function CalculateRoute(mapPoint, pollPoint) {
         mapPoint = null;
         pollPoint = null;
         noRoute = true;
+        featureID = null;
         HideProgressIndicator();
         map.infoWindow.hide();
         ClearSelection();
@@ -123,12 +124,11 @@ function ShowRoute(solveResult) {
                 var divDirections = "div" + index + "content";
                 RemoveChildren(dojo.byId("divInfoDirectionsScroll"));
             }
-            else if (pollingPlaceData[index].ShowDirection == false) {
-                var divDirection = "div" + index + "content";
-                RemoveChildren(dojo.byId("divInfoDirectionsScroll"));
-            }
+
             if (!pollingPlaceData[index].Data) {
-                divDirecHdr.innerHTML = pollingPlaceData[index].Title;
+                if (pollingPlaceData[index].ShowDirection)  {
+                    divDirecHdr.innerHTML = pollingPlaceData[index].Title;
+                }
             }
         }
         dojo.byId('divInfoDirectionsScroll').appendChild(divDirecHdr);
@@ -169,16 +169,10 @@ function ShowRoute(solveResult) {
         if (divDirections) {
             dojo.byId("divInfoDirectionsScroll").appendChild(tableSummary);
         }
-        else {
-            dojo.byId("divInfoDirectionsScroll").innerHTML = "&nbsp" + messages.getElementsByTagName("noDirections")[0].childNodes[0].nodeValue;
-        }
     }
     else {
         if (divDirections) {
             dojo.byId(divDirections).appendChild(tableSummary);
-        }
-        else {
-            dojo.byId(divDirection).innerHTML = "&nbsp" + messages.getElementsByTagName("noDirections")[0].childNodes[0].nodeValue;
         }
     }
     if (divDirections) {
@@ -201,7 +195,7 @@ function ShowRoute(solveResult) {
             if (map.getLayer(tempGraphicsLayerId).graphics.length == 0) {
                 var attr = [];
                 attr = { Address: "my location" };
-                var symbol = new esri.symbol.PictureMarkerSymbol(locatorMarkupSymbolPath, 25, 25);
+                var symbol = new esri.symbol.PictureMarkerSymbol(locatorSettings.DefaultLocatorSymbol, locatorSettings.SymbolSize.width, locatorSettings.SymbolSize.height);
                 var graphic = new esri.Graphic(mapPoint, symbol, attr, null);
                 map.getLayer(tempGraphicsLayerId).add(graphic);
             }
@@ -247,24 +241,18 @@ function ShowRoute(solveResult) {
             divSegmentContent.appendChild(table);
             CreateDirectionsScrollBar();
         }
-        else {
-            dojo.byId(divDirection).innerHTML = "&nbsp" + messages.getElementsByTagName("noDirections")[0].childNodes[0].nodeValue;
-        }
     }
     else {
         if (divDirections) {
             dojo.byId("divInfoDirectionsScroll").appendChild(table);
         }
-        else {
-            dojo.byId("divInfoDirectionsScroll").innerHTML = "&nbsp" + messages.getElementsByTagName("noDirections")[0].childNodes[0].nodeValue;
-        }
     }
 }
 
-//function to create scrollbar for comments
+//Create scrollbar for comments
 function CreateDirectionsScrollBar() {
     CreateScrollbar(dojo.byId("divSegmentContainer"), dojo.byId("divSegmentContent"));
-    dojo.byId("divSegmentContainerscrollbar_track").style.top = (dojo.coords(dojo.byId('divSegmentContainer')).t+1) + "px";
+    dojo.byId("divSegmentContainerscrollbar_track").style.top = (dojo.coords(dojo.byId('divSegmentContainer')).t + 1) + "px";
     dojo.byId("divSegmentContainerscrollbar_track").style.right = 5 + "px";
     dojo.byId("divSegmentContainerscrollbar_track").style.height = 90 + "px";
     var hanHeight = parseInt(dojo.byId("divSegmentContainerscrollbar_handle").style.height.split("p"));

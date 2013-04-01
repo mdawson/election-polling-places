@@ -1,5 +1,5 @@
 ﻿/** @license
- | Version 10.1.1
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  | See the License for the specific language governing permissions and
  | limitations under the License.
  */
-//function to display the result panel
+//Toggle bottom panel
 function ShowHideResult(imgToggle) {
     if (!noRoute) {
         if (pollPoint) {
@@ -42,7 +42,7 @@ function ShowHideResult(imgToggle) {
     }
 }
 
-//function for wiping in bottom panel
+//Wipe-In bottom panel
 function WipeInResults() {
     dojo.byId("imgToggleResults").style.cursor = "pointer";
     dojo.byId("esriLogo").style.bottom = "210px";
@@ -53,7 +53,7 @@ function WipeInResults() {
     dojo.replaceClass("divGradient", "hideBottomContainer", "showBottomContainer");
 }
 
-//function for wiping out bottom panel
+//Wipe-Out bottom panel
 function WipeOutResults() {
     dojo.byId("esriLogo").style.bottom = "0px";
     dojo.byId('showHide').style.bottom = "0px";
@@ -63,7 +63,7 @@ function WipeOutResults() {
     dojo.replaceClass("divGradient", "showBottomContainer", "hideBottomContainer");
 }
 
-//function to show the elected officials data
+//Display elected officials data
 function ShowElectedOffialInfo(attributes, electedOfficialsTabData, index, fields, aliases) {
 
     var divContainer = dojo.byId("div" + index + "content");
@@ -148,24 +148,24 @@ function FindLocation(evt) {
     map.getLayer(routeGraphicsLayerId).clear();
     map.getLayer(highlightPollLayerId).clear();
     ClearGraphics();
+    featureID = null;
     map.infoWindow.hide();
     mapPoint = evt.mapPoint;
 
-    var locator2 = new esri.tasks.Locator(locatorURL);
+    var locator2 = new esri.tasks.Locator(locatorSettings.LocatorURL);
     locator2.locationToAddress(evt.mapPoint, 100);
     dojo.connect(locator2, "onLocationToAddressComplete", function (candidate) {
         if (candidate.address) {
-            var symbol = new esri.symbol.PictureMarkerSymbol(locatorMarkupSymbolPath, 25, 25);
+            var symbol = new esri.symbol.PictureMarkerSymbol(locatorSettings.DefaultLocatorSymbol, locatorSettings.SymbolSize.width, locatorSettings.SymbolSize.height);
             var attr = [];
             if (candidate.address.Loc_name == "US_Zipcode") {
                 attr = { Address: candidate.address.Zip };
             }
             else {
                 var address = [];
-                var fields = "Address,City,State,Zip";
-                for (var att = 0; att < fields.split(",").length; att++) {
-                    if (candidate.address[fields.split(",")[att]]) {
-                        address.push(candidate.address[fields.split(",")[att]]);
+                for (var att = 0; att < locatorSettings.LocatorFields.length; att++) {
+                    if (candidate.address[locatorSettings.LocatorFields[att]]) {
+                        address.push(candidate.address[locatorSettings.LocatorFields[att]]);
                     }
                 }
                 attr = { Address: address.join(',') };
@@ -186,7 +186,7 @@ function FindLocation(evt) {
 
 }
 
-//function to get the name of the Layer from Config
+//Get the name of the Layer from Config
 function GetOfficeName(officeURL, officeData, index) {
     queryTask = new esri.tasks.QueryTask(electedOfficialsTabData[index].ServiceUrl);
     var queryCounty = new esri.tasks.Query();
@@ -202,9 +202,10 @@ function GetOfficeName(officeURL, officeData, index) {
     );
 }
 
-//function to query precinct layer
+//Query precinct layer
 function FindPrecinctLayer() {
     selectedPollPoint = null;
+    featureID = null;
     map.getLayer(highlightPollLayerId).clear();
     var query = new esri.tasks.Query();
     query.geometry = mapPoint;
@@ -219,6 +220,7 @@ function FindPrecinctLayer() {
         else {
             pollPoint = null;
             mapPoint = null;
+            featureID = null;
             HideProgressIndicator();
             map.infoWindow.hide();
             ClearSelection();
@@ -239,20 +241,31 @@ function FindPrecinctLayer() {
     });
 }
 
-//function to get the PollingID
+//Get the PollingID
 function GetpollingId(features) {
     // Save the precinct attributes
     var precinctAttrs = features[0].attributes;
 
+    var relationshipId;
+    (isBrowser ? pollLayer.PrimaryKeyForPolling : pollMobileLayer.PrimaryKeyForPolling).replace(/\$\{([^\s\:\}]+)(?:\:([^\s\:\}]+))?\}/g, function (match, key) {
+        relationshipId = key;
+    });
+
+    var precinctField;
+    precinctID.replace(/\$\{([^\s\:\}]+)(?:\:([^\s\:\}]+))?\}/g, function (match, key) {
+        precinctField = key;
+    });
+
     var queryTable = new esri.tasks.Query();
-    queryTable.where = "PRECINCTID  = '" + features[0].attributes.PRECINCTID + "'";
-    queryTable.outFields = ["POLLINGID"];
+    queryTable.where = precinctField + "= '" + features[0].attributes.PRECINCTID + "'";
+    queryTable.outFields = [relationshipId];
     map.getLayer(precinctOfficeLayerId).queryFeatures(queryTable, function (features) {
         if (features.features.length > 0) {
             GetDesignatedPollingPlace(features, precinctAttrs);
         }
         else {
             selectedPollPoint = null;
+            featureID = null;
             pollPoint = null;
             mapPoint = null;
             HideProgressIndicator();
@@ -273,13 +286,19 @@ function GetpollingId(features) {
     });
 }
 
-//function to get the Designated Polling Place
+//Get the Designated Polling Place
 function GetDesignatedPollingPlace(features, precinctAttrs) {
+    featureID = null;
     map.infoWindow.hide();
     map.getLayer(highlightPollLayerId).clear();
     map.getLayer(pollLayerId).clearSelection();
     var queryPollingPlaces = new esri.tasks.Query();
-    queryPollingPlaces.where = "POLLINGID = '" + features.features[0].attributes["POLLINGID"] + "'";
+    var relationshipId;
+    (isBrowser ? pollLayer.PrimaryKeyForPolling : pollMobileLayer.PrimaryKeyForPolling).replace(/\$\{([^\s\:\}]+)(?:\:([^\s\:\}]+))?\}/g, function (match, key) {
+        relationshipId = key;
+    });
+
+    queryPollingPlaces.where = relationshipId + "= '" + dojo.string.substitute((isBrowser ? pollLayer.PrimaryKeyForPolling : pollMobileLayer.PrimaryKeyForPolling), features.features[0].attributes) + "'";
     map.getLayer(pollLayerId).selectFeatures(queryPollingPlaces, esri.layers.FeatureLayer.SELECTION_NEW, function (features) {
         map.getLayer(highlightPollLayerId).clear();
         map.getLayer(pollLayerId).clearSelection();
@@ -295,14 +314,29 @@ function GetDesignatedPollingPlace(features, precinctAttrs) {
             // Add the precinct display to the polling place
             var amendedAttrs = dojo.clone(features[0].attributes);
             amendedAttrs["_PrecinctAttributes"] = precinctAttrs;
-            ShowPollingPlace(null, amendedAttrs);
 
-            var symbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, locatorRippleSize, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([225, 0, 0, 0.75]), 4), new dojo.Color([0, 0, 0, 0]));
+            storeAttr = dojo.string.substitute(infoWindowHeader, features[0].attributes);
+
+            var extent = GetQuerystring('extent');
+            if (extent != "") {
+                if (generateRouteToNonDesignatedPollingPlace) {
+                    if ((window.location.toString().split('$featureID=').length <= 1)) {
+                        ShowPollingPlace(null, amendedAttrs);
+                    }
+                }
+                else {
+                    ShowPollingPlace(null, amendedAttrs);
+                }
+            }
+            else {
+                ShowPollingPlace(null, amendedAttrs);
+            }
+
+            var symbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, locatorSettings.LocatorRippleSize, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([225, 0, 0, 0.75]), 4), new dojo.Color([0, 0, 0, 0]));
             AddGraphic(map.getLayer(highlightPollLayerId), symbol, pollPoint);
             if (isMobileDevice) {
                 ShowServiceInfoDetails(pollPoint, features[0].attributes);
             }
-            storeAttr = dojo.string.substitute(infoWindowHeader, features[0].attributes);
         }
         if (!isMobileDevice) {
             var imgToggle = dojo.byId('imgToggleResults');
@@ -331,7 +365,7 @@ function GetDesignatedPollingPlace(features, precinctAttrs) {
     });
 }
 
-//sliding to the right
+//slide to right
 function SlideRight() {
     var difference = dojo.byId('divPollingData').offsetWidth - dojo.byId('carouselscroll').offsetWidth;
     if (newLeft >= difference) {
@@ -342,7 +376,7 @@ function SlideRight() {
         dojo.byId('carouselscroll').style.left = newLeft + "px";
         dojo.addClass(dojo.byId('carouselscroll'), "slidePanel");
 
-        if (newLeft < difference) {
+        if ((newLeft <= (difference + 5))) {
             dojo.byId('PollingRightArrow').style.display = "none";
         }
         if (dojo.byId('PollingRightArrow').style.display == "none") {
@@ -354,7 +388,7 @@ function SlideRight() {
     }
 }
 
-//sliding to the left
+//slide to left
 function SlideLeft() {
     var difference = dojo.byId('divPollingData').offsetWidth - dojo.byId('carouselscroll').offsetWidth;
     if (newLeft < 0) {
@@ -378,7 +412,8 @@ function SlideLeft() {
         }
     }
 }
-//sliding to the right
+
+//slide elected officials data panels to the right
 function SlideOfficeRight() {
     var difference = dojo.byId('divOfficeData').offsetWidth - dojo.byId('carouselOfficescroll').offsetWidth;
     if (newLeftOffice >= difference) {
@@ -389,7 +424,7 @@ function SlideOfficeRight() {
         dojo.byId('carouselOfficescroll').style.left = newLeftOffice + "px";
         dojo.addClass(dojo.byId('carouselscroll'), "slidePanel");
 
-        if (newLeftOffice < difference) {
+        if (newLeftOffice <= (difference + 5)) {
             dojo.byId('OfficeRightArrow').style.display = "none";
         }
         if (dojo.byId('OfficeRightArrow').style.display == "none") {
@@ -401,7 +436,7 @@ function SlideOfficeRight() {
     }
 }
 
-//sliding to the left
+//slide elected officials data panels to the left
 function SlideOfficeLeft() {
     var difference = dojo.byId('divOfficeData').offsetWidth - dojo.byId('carouselOfficescroll').offsetWidth;
     if (newLeftOffice < 0) {
@@ -427,7 +462,7 @@ function SlideOfficeLeft() {
     }
 }
 
-//function for reseting the slide controls
+//Reset the slide controls
 function ResetSlideControls() {
     if (newLeftOffice > dojo.byId("divOfficeData").offsetWidth - dojo.byId("carouselOfficescroll").offsetWidth) {
         dojo.byId('OfficeRightArrow').style.display = "block";

@@ -1,5 +1,5 @@
 ﻿/** @license
- | Version 10.1.1
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +38,7 @@ dojo.declare("js.Config", null, {
     // 9d. Customize info-Popup size                  - [ Tag(s) to look for: InfoPopupHeight, InfoPopupWidth ]
     // 9e. Customize data formatting                  - [ Tag(s) to look for: ShowNullValueAs, FormatDateAs ]
     //
-    // 10. Customize address search settings          - [ Tag(s) to look for: LocatorURL, LocatorFields, LocatorDefaultAddress, LocatorMarkupSymbolPath, LocatorRippleSize ]
+    // 10. Customize address search settings          - [ Tag(s) to look for: LocatorSettings ]
     //
     // 11. Set URL for geometry service               - [ Tag(s) to look for: GeometryService ]
     //
@@ -91,7 +91,7 @@ dojo.declare("js.Config", null, {
           ],
 
     // Initial map extent. Use comma (,) to separate values and don t delete the last comma
-                    DefaultExtent: "-9817810,5124390,-9808630,5128700",
+    DefaultExtent: "-9817810,5124390,-9808630,5128700",
 
     // ------------------------------------------------------------------------------------------------------------------------
     // OPERATIONAL DATA SETTINGS
@@ -100,8 +100,8 @@ dojo.declare("js.Config", null, {
     UseWebmap: false,
 
     // if using WebMap, specify WebMapID within quotes, otherwise leave this empty and configure operational layers
-    WebMapId: "6706a58177074f38963240d46dd01218",
-    // if using WebMap, rest of the operational data settings will be pickedup from WebMap
+    WebMapId: "2e205ed5c9fd48d182c7193e5dee241f",
+    // if using WebMap, rest of the operational data settings will be picked up from WebMap
 
     // if not using WebMap, set the following options
     // Configure operational layers:
@@ -109,13 +109,15 @@ dojo.declare("js.Config", null, {
           {
               ServiceUrl: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/DoNotUse/DoNotUsePollingPlaces/MapServer/0",
               Image: "images/pollingPlace.png",
-              UseImage: false
+              UseImage: false,
+              PrimaryKeyForPolling: "${POLLINGID}"
           },
     PollMobileLayer:
           {
               ServiceUrl: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/DoNotUse/DoNotUsePollingPlaces/MapServer/0",
               Image: "images/pollingPlace.png",
-              UseImage: false
+              UseImage: false,
+              PrimaryKeyForPolling: "${POLLINGID}"
           },
 
     PrecinctLayer:
@@ -128,13 +130,18 @@ dojo.declare("js.Config", null, {
 
     PrecinctOfficeLayer: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/DoNotUse/DoNotUsePollingPlaces/MapServer/1",
 
-    PollingCommentsLayer: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/DoNotUse/DoNotUsePollingPlaces/MapServer/2",
+    // Set field for precinct ID
+    PrecinctID: "${PRECINCTID}",
+
+    PollingCommentsLayer: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/DoNotUse/DoNotUsePollingPlaces/FeatureServer/2",
+    // Set primary key for comments table
+    PrimaryKeyForComments: "${POLLINGID}",
 
     // ServiceUrl is the REST end point for the reference overlay layer
     // DisplayOnLoad setting this will show the reference overlay layer on load
     ReferenceOverlayLayer:
           {
-              ServiceUrl: "http://yourserver/ArcGIS/rest/services/ReferenceOverlay/MapServer",
+              ServiceUrl: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/Election/ReferenceOverlay/MapServer",
               DisplayOnLoad: false
           },
 
@@ -195,7 +202,7 @@ dojo.declare("js.Config", null, {
 
 
     // Set size of the info-Popup - select maximum height and width in pixels (not applicable for tabbed info-Popups)
-    InfoPopupHeight: 260, //minimum height should be 280 for the info-popup in pixels
+    InfoPopupHeight: 260, //minimum height should be 260 for the info-popup in pixels
     InfoPopupWidth: 330, //minimum width should be 330 for the info-popup in pixels
 
     // Set string value to be shown for null or blank values
@@ -208,21 +215,22 @@ dojo.declare("js.Config", null, {
     // ------------------------------------------------------------------------------------------------------------------------
     // ADDRESS SEARCH SETTINGS
     // ------------------------------------------------------------------------------------------------------------------------
-    // Set Locator service URL
-    LocatorURL: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/TA_Address_NA_10/GeocodeServer",
 
-    // Set Locator fields (fields to be used for searching)
-    LocatorFields: "SingleLine",
-
-    // Set default address to search
-    LocatorDefaultAddress: "321 Redbud Dr,Naperville,IL,60540",
-
-    // Set pushpin image path
-    LocatorMarkupSymbolPath: "images/Pushpin.png",
-
-    // Set ripple size
-    LocatorRippleSize: 40,
-
+    // Set Locator service settings
+    LocatorSettings: {
+        DefaultLocatorSymbol: "images/RedPushpin.png",
+        SymbolSize: { width: 25, height: 25 },
+        DefaultValue: "321 Redbud Dr,Naperville,IL,60540",
+        LocatorParameters: ["SingleLine"],
+        LocatorFields: ["Address", "City", "State", "Zip"],
+        LocatorURL: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/TA_Address_NA_10/GeocodeServer",
+        CandidateFields: "Loc_name, Score, Match_addr",
+        FieldName: "${Match_addr}",
+        LocatorFieldName: 'Loc_name',
+        LocatorFieldValues: ["US_Streets", "US_StreetName"],
+        AddressMatchScore: 80,
+        LocatorRippleSize: 40
+    },
 
     // ------------------------------------------------------------------------------------------------------------------------
     // GEOMETRY SERVICE SETTINGS
@@ -323,6 +331,11 @@ dojo.declare("js.Config", null, {
                         HeaderColor: "#303030",
                         Title: "<b>Directions</b>",
                         ShowDirection: true
+                    },
+              CommentsBox:
+                    {
+                        HeaderColor: "#303030",
+                        Title: "<b>Comments</b>"
                     }
           },
 
@@ -431,6 +444,21 @@ dojo.declare("js.Config", null, {
                     }
           },
 
+    // Define the database field names
+    // Note: DateFieldName refers to a date database field.
+    // All other attributes refer to text database fields.
+    DatabaseFields: {
+        PollingIdFieldName: "POLLINGID",
+        CommentsFieldName: "COMMENTS",
+        DateFieldName: "SUBMITDT"
+    },
+
+    // Set info-pop fields for displaying comment
+    CommentsInfoPopupFieldsCollection: {
+        Submitdate: "${SUBMITDT}",
+        Comments: "${COMMENTS}"
+    },
+
     // ------------------------------------------------------------------------------------------------------------------------
     // SETTINGS FOR MAP SHARING
     // ------------------------------------------------------------------------------------------------------------------------
@@ -444,5 +472,4 @@ dojo.declare("js.Config", null, {
               TwitterShareURL: "http://twitter.com/home/?status=Election%20Polling%20Place ${0}",
               ShareByMailLink: "mailto:%20?subject=Checkout%20this%20map!&body=${0}"
           }
-
 });

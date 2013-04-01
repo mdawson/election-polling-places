@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
- | Version 10.1.1
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,22 +16,23 @@
  | limitations under the License.
 -->
 <Messages>
-  <addressToLocate>Enter address to Locate</addressToLocate>
-  <unableToLocate>Unable to locate specified address.</unableToLocate>
-  <noDataAvlbl>Searched address is outside the supported area </noDataAvlbl>
-  <blankAddress>Enter address to locate.</blankAddress>
-  <noPollingPlaces>There are no polling place details available for this location</noPollingPlaces>
-  <nonDesignatedPollingPlace>Not the designated polling place</nonDesignatedPollingPlace>
-  <directionsMessage>No starting point available</directionsMessage>
-  <noAttachments>No attachments available</noAttachments>
-  <designatedPollingPlaces>There are no designated polling place details available for this location</designatedPollingPlaces>
-  <noDirections>Directions list turned off in the configuration file</noDirections>
-  <enterComment>Please enter comment</enterComment>
-  <commentsLength>Comment should not exceed 250 characters</commentsLength>
-  <tinyURLEngine>TinyURL API engine is not working, Please try again after some time.</tinyURLEngine>
-  <geoLocation>You are currently outside the supported area</geoLocation>
-  <geolocationTimeout>The browser is unable to supply a position at this time</geolocationTimeout>
-  <geolocationPositionUnavailable>Position unavailable</geolocationPositionUnavailable>
-  <geolocationPermissionDenied>Permission denied</geolocationPermissionDenied>
-  <geolocationUnKnownError>Unknown error</geolocationUnKnownError>
+    <addressToLocate>Enter address to Locate.</addressToLocate>
+    <unableToLocate>Unable to locate specified address.</unableToLocate>
+    <noDataAvlbl>Searched address is outside the supported area </noDataAvlbl>
+    <blankAddress>Enter address to locate.</blankAddress>
+    <noPollingPlaces>There are no polling place details available for this location.</noPollingPlaces>
+    <nonDesignatedPollingPlace>Not the designated polling place.</nonDesignatedPollingPlace>
+    <directionsMessage>No starting point available.</directionsMessage>
+    <noAttachments>No attachments available.</noAttachments>
+    <designatedPollingPlaces>There are no designated polling place details available for this location.</designatedPollingPlaces>
+    <noSearchResults>No results found.</noSearchResults>
+    <enterComment>Please enter comment.</enterComment>
+    <commentsLength>Comment should not exceed 250 characters.</commentsLength>
+    <noComments>No comments available.</noComments>
+    <tinyURLEngine>TinyURL API engine is not working, Please try again after some time.</tinyURLEngine>
+    <geoLocation>You are currently outside the supported area.</geoLocation>
+    <geolocationTimeout>The browser is unable to supply a position at this time.</geolocationTimeout>
+    <geolocationPositionUnavailable>Position unavailable.</geolocationPositionUnavailable>
+    <geolocationPermissionDenied>Permission denied.</geolocationPermissionDenied>
+    <geolocationUnKnownError>Unknown error.</geolocationUnKnownError>
 </Messages>

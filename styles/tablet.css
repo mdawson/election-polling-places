@@ -1,5 +1,5 @@
 ﻿/*
- | Version 10.1.1
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -83,6 +83,7 @@ html, body
 {
     font-size: 14px !important;
     width:230px !important;
+    font-family: Verdana !important;
     height:44px;
 }
 

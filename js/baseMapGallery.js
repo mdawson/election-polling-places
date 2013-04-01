@@ -1,5 +1,5 @@
 ﻿/** @license
- | Version 10.1.1
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  | See the License for the specific language governing permissions and
  | limitations under the License.
  */
-//function for creating the basemap components
+//Create basemap components
 function CreateBaseMapComponent() {
     for (var i = 0; i < baseMapLayers.length; i++) {
         map.addLayer(CreateBaseMapLayer(baseMapLayers[i].MapURL, baseMapLayers[i].Key, (i == 0) ? true : false));
@@ -24,7 +24,6 @@ function CreateBaseMapComponent() {
             });
         }
     }
-
 
     var layerList = dojo.byId('layerList');
 
@@ -51,7 +50,7 @@ function CreateBaseMapComponent() {
     }
 }
 
-//function for creating the elements for toggling the maps
+//Create basemap images with respective titles
 function CreateBaseMapElement(baseMapLayerInfo) {
     var divContainer = document.createElement("div");
     divContainer.className = "baseMapContainerNode";
@@ -73,7 +72,13 @@ function CreateBaseMapElement(baseMapLayerInfo) {
     return divContainer;
 }
 
-//function for changing the layer onclick
+//Create basemap layer on the map
+function CreateBaseMapLayer(layerURL, layerId, isVisible) {
+    var layer = new esri.layers.ArcGISTiledMapServiceLayer(layerURL, { id: layerId, visible: isVisible });
+    return layer;
+}
+
+//Toggle basemap layer
 function ChangeBaseMap(spanControl) {
     HideMapLayers();
     var key = spanControl.getAttribute('layerId');
@@ -101,13 +106,7 @@ function ChangeBaseMap(spanControl) {
     }
 }
 
-//function for creating the layer on the map
-function CreateBaseMapLayer(layerURL, layerId, isVisible) {
-    var layer = new esri.layers.ArcGISTiledMapServiceLayer(layerURL, { id: layerId, visible: isVisible });
-    return layer;
-}
-
-//function to hide the layers
+//Hide layers
 function HideMapLayers() {
     for (var i = 0; i < baseMapLayers.length; i++) {
         var layer = map.getLayer(baseMapLayers[i].Key);
@@ -117,7 +116,7 @@ function HideMapLayers() {
     }
 }
 
-//function to animate basemap switch
+//Animate basemap container
 function ShowBaseMaps() {
     if (dojo.coords("divAppContainer").h > 0) {
         dojo.replaceClass("divAppContainer", "hideContainerHeight", "showContainerHeight");
@@ -135,9 +134,14 @@ function ShowBaseMaps() {
         dojo.byId('divLayerContainer').style.height = '0px';
     }
     else {
-        dojo.byId('divLayerContainer').style.height = Math.ceil(baseMapLayers.length / 2) * cellHeight + "px";
+        dojo.byId('divLayerContainer').style.height = cellHeight + "px";
+        dojo.byId('divLayerContentHolder').style.height = (cellHeight - 10) + "px";
+        dojo.byId('divLayerContentHolder').style.top = "0px";
         dojo.replaceClass("divLayerContainer", "showContainerHeight", "hideContainerHeight");
     }
+    setTimeout(function () {
+        CreateScrollbar(dojo.byId("divLayerContainerHolder"), dojo.byId("divLayerContentHolder"));
+    }, 500);
 }
 
 
