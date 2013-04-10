@@ -469,7 +469,7 @@ dojo.declare("js.Config", null, {
               TinyURLResponseAttribute: "data.url",
 
               FacebookShareURL: "http://www.facebook.com/sharer.php?u=${0}&t=Election%20Polling%20Place",
-              TwitterShareURL: "http://twitter.com/home/?status=Election%20Polling%20Place ${0}",
+              TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Election%20Polling%20Place ${0}",
               ShareByMailLink: "mailto:%20?subject=Checkout%20this%20map!&body=${0}"
           }
 });
