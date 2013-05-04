@@ -96,15 +96,12 @@ dojo.declare("js.Config", null, {
     // ------------------------------------------------------------------------------------------------------------------------
     // OPERATIONAL DATA SETTINGS
     // ------------------------------------------------------------------------------------------------------------------------
-    // Choose if you want to use WebMap or Map Services for operational layers
+    // WebMaps are not supported with the 10.2 version of the Election Polling Place application. Please use Map Services for operational layers. Do not change the "UseWebmap" and "WebMapId" parameters.
     UseWebmap: false,
 
-    // if using WebMap, specify WebMapID within quotes, otherwise leave this empty and configure operational layers
-    WebMapId: "2e205ed5c9fd48d182c7193e5dee241f",
-    // if using WebMap, rest of the operational data settings will be picked up from WebMap
+    WebMapId: "",
 
-    // if not using WebMap, set the following options
-    // Configure operational layers:
+    // Set the following options for the configuration of operational layers
     PollLayer:
           {
               ServiceUrl: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/DoNotUse/DoNotUsePollingPlaces/MapServer/0",
