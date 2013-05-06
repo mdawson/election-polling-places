@@ -45,13 +45,13 @@ on the ArcGIS Resource Center can guide you in the setup and configuration of th
 
 Learn more about Esri's [ArcGIS for Local Government maps and apps](http://resources.arcgis.com/en/communities/local-government/).
 
-Show me a list of other [Local Government GitHub repositories](https://github.com/search?q=username:esri+local+government).
+Show me a list of other [Local Government GitHub repositories](http://esri.github.io/#Local%2DGovernment).
 
 Additional [information and sample data](http://www.arcgis.com/home/item.html?id=43e8ad99d7bc4280b1b837b8644a1a9e)
 are available for the application.
 
-This application uses the 2.8 version of
-[Esri's ArcGIS API for JavaScript](http://help.arcgis.com/en/webapi/javascript/arcgis/index.html);
+This application uses the 3.5 version of
+[Esri's ArcGIS API for JavaScript](http://help.arcgis.com/en/webapi/javascript/arcgis/);
 see the site for concepts, samples, and a reference for using the API to create mapping web sites.
 
 ## Issues
