@@ -91,7 +91,7 @@ dojo.declare("js.Config", null, {
           ],
 
     // Initial map extent. Use comma (,) to separate values and don t delete the last comma
-    DefaultExtent: "-9817810,5124390,-9808630,5128700",
+    DefaultExtent: "-9816010,5123000,-9809970,5129500",
 
     // ------------------------------------------------------------------------------------------------------------------------
     // OPERATIONAL DATA SETTINGS
@@ -220,11 +220,11 @@ dojo.declare("js.Config", null, {
         DefaultValue: "321 Redbud Dr,Naperville,IL,60540",
         LocatorParameters: ["SingleLine"],
         LocatorFields: ["Address", "City", "State", "Zip"],
-        LocatorURL: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/TA_Address_NA_10/GeocodeServer",
+        LocatorURL: "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
         CandidateFields: "Loc_name, Score, Match_addr",
         FieldName: "${Match_addr}",
         LocatorFieldName: 'Loc_name',
-        LocatorFieldValues: ["US_Streets", "US_StreetName"],
+        LocatorFieldValues: ["USA.StreetName" , "USA.PointAddress", "USA.StreetAddress"],
         AddressMatchScore: 80,
         LocatorRippleSize: 40
     },
