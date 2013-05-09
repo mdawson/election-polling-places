@@ -233,13 +233,13 @@ dojo.declare("js.Config", null, {
     // GEOMETRY SERVICE SETTINGS
     // ------------------------------------------------------------------------------------------------------------------------
     // Set geometry service URL
-    GeometryService: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/Geometry/GeometryServer",
+    GeometryService: "http://arcgis-localgov-61933129.us-west-1.elb.amazonaws.com/arcgis/rest/services/Utilities/Geometry/GeometryServer",
 
 
     // ------------------------------------------------------------------------------------------------------------------------
     // DRIVING DIRECTIONS SETTINGS
     // ------------------------------------------------------------------------------------------------------------------------
-    // Set URL for routing service (network analyst)
+    // Set URL for routing service (network analyst), to turn off the routing functionality update the "ShowDirection" variable to false in the "PollingPlaceTabData" section below.
     RouteServiceURL: "http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route",
 
     // Set color for the route symbol
