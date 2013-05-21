@@ -217,7 +217,7 @@ dojo.declare("js.Config", null, {
     LocatorSettings: {
         DefaultLocatorSymbol: "images/RedPushpin.png",
         SymbolSize: { width: 25, height: 25 },
-        DefaultValue: "321 Redbud Dr,Naperville,IL,60540",
+        DefaultValue: "139 W Porter Ave Naperville IL 60540",
         LocatorParameters: ["SingleLine"],
         LocatorFields: ["Address", "City", "State", "Zip"],
         LocatorURL: "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
