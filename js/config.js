@@ -104,14 +104,14 @@ dojo.declare("js.Config", null, {
     // Set the following options for the configuration of operational layers
     PollLayer:
           {
-              ServiceUrl: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/DoNotUse/DoNotUsePollingPlaces/MapServer/0",
+              ServiceUrl: "http://services.arcgis.com/b6gLrKHqgkQb393u/ArcGIS/rest/services/PollingPlacesTryItLive/FeatureServer/0",
               Image: "images/pollingPlace.png",
               UseImage: false,
               PrimaryKeyForPolling: "${POLLINGID}"
           },
     PollMobileLayer:
           {
-              ServiceUrl: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/DoNotUse/DoNotUsePollingPlaces/MapServer/0",
+              ServiceUrl: "http://services.arcgis.com/b6gLrKHqgkQb393u/ArcGIS/rest/services/PollingPlacesTryItLive/FeatureServer/0",
               Image: "images/pollingPlace.png",
               UseImage: false,
               PrimaryKeyForPolling: "${POLLINGID}"
@@ -119,18 +119,18 @@ dojo.declare("js.Config", null, {
 
     PrecinctLayer:
           {
-              ServiceUrl: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/Election/Precincts/MapServer/0",
+              ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/0",
               Color: "#00ff00",
               Alpha: 0.75,
               UseColor: false
           },
 
-    PrecinctOfficeLayer: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/DoNotUse/DoNotUsePollingPlaces/MapServer/1",
+    PrecinctOfficeLayer: "http://services.arcgis.com/b6gLrKHqgkQb393u/ArcGIS/rest/services/PollingPlacesTryItLive/FeatureServer/1",
 
     // Set field for precinct ID
     PrecinctID: "${PRECINCTID}",
 
-    PollingCommentsLayer: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/DoNotUse/DoNotUsePollingPlaces/FeatureServer/2",
+    PollingCommentsLayer: "http://services.arcgis.com/b6gLrKHqgkQb393u/ArcGIS/rest/services/PollingPlacesTryItLive/FeatureServer/2",
     // Set primary key for comments table
     PrimaryKeyForComments: "${POLLINGID}",
 
@@ -138,7 +138,7 @@ dojo.declare("js.Config", null, {
     // DisplayOnLoad setting this will show the reference overlay layer on load
     ReferenceOverlayLayer:
           {
-              ServiceUrl: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/Election/ReferenceOverlay/MapServer",
+              ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/ReferenceOverlay/MapServer",
               DisplayOnLoad: false
           },
 
@@ -233,7 +233,7 @@ dojo.declare("js.Config", null, {
     // GEOMETRY SERVICE SETTINGS
     // ------------------------------------------------------------------------------------------------------------------------
     // Set geometry service URL
-    GeometryService: "http://arcgis-localgov-61933129.us-west-1.elb.amazonaws.com/arcgis/rest/services/Utilities/Geometry/GeometryServer",
+    GeometryService: "http://arcgis-tenone2012-1974758903.us-west-1.elb.amazonaws.com/arcgis/rest/services/Utilities/Geometry/GeometryServer",
 
 
     // ------------------------------------------------------------------------------------------------------------------------
