@@ -341,7 +341,7 @@ dojo.declare("js.Config", null, {
           {
               USCongressionalLayer:
                     {
-                        ServiceUrl: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/Election/Precincts/MapServer/4",
+                        ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/4",
                         HeaderColor: "#303030",
                         Title: "<b>US Congressional District</b>",
                         Data:
@@ -366,7 +366,7 @@ dojo.declare("js.Config", null, {
                     },
               StateSenateLayer:
                     {
-                        ServiceUrl: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/Election/Precincts/MapServer/3",
+                        ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/3",
                         HeaderColor: "#303030",
                         Title: "<b>State Senate District</b>",
                         Data:
@@ -391,7 +391,7 @@ dojo.declare("js.Config", null, {
                     },
               StateHouseLayer:
                     {
-                        ServiceUrl: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/Election/Precincts/MapServer/2",
+                        ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/2",
                         HeaderColor: "#303030",
                         Title: "<b>State House District</b>",
                         Data:
@@ -416,7 +416,7 @@ dojo.declare("js.Config", null, {
                     },
               CountyLayer:
                     {
-                        ServiceUrl: "http://localgovtemplates2.esri.com/ArcGIS/rest/services/Election/Precincts/MapServer/1",
+                        ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/1",
                         HeaderColor: "#303030",
                         Title: "<b>County District</b>",
                         Data:
