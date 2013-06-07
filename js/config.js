@@ -1,4 +1,5 @@
-﻿/** @license
+﻿/*global dojo */
+/** @license
  | Version 10.2
  | Copyright 2012 Esri
  |
@@ -74,21 +75,17 @@ dojo.declare("js.Config", null, {
     // ------------------------------------------------------------------------------------------------------------------------
     // Set baseMap layers
     // Please note: All basemaps need to use the same spatial reference. By default, on application start the first basemap will be loaded
-    BaseMapLayers:
-          [
-                    {
-                        Key: "parcelMap",
-                        ThumbnailSource: "images/parcelMap.png",
-                        Name: "Streets",
-                        MapURL: "http://arcgis-tenone2012-1974758903.us-west-1.elb.amazonaws.com/arcgis/rest/services/ParcelPublicAccess/MapServer"
-                    },
-                    {
-                        Key: "hybridMap",
-                        ThumbnailSource: "images/imageryHybrid.png",
-                        Name: "Imagery",
-                        MapURL: "http://arcgis-tenone2012-1974758903.us-west-1.elb.amazonaws.com/arcgis/rest/services/ImageryHybrid/MapServer"
-                    }
-          ],
+    BaseMapLayers: [{
+        Key: "parcelMap",
+        ThumbnailSource: "images/parcelMap.png",
+        Name: "Streets",
+        MapURL: "http://arcgis-tenone2012-1974758903.us-west-1.elb.amazonaws.com/arcgis/rest/services/ParcelPublicAccess/MapServer"
+    }, {
+        Key: "hybridMap",
+        ThumbnailSource: "images/imageryHybrid.png",
+        Name: "Imagery",
+        MapURL: "http://arcgis-tenone2012-1974758903.us-west-1.elb.amazonaws.com/arcgis/rest/services/ImageryHybrid/MapServer"
+    }],
 
     // Initial map extent. Use comma (,) to separate values and don t delete the last comma
     DefaultExtent: "-9816010,5123000,-9809970,5129500",
@@ -102,28 +99,25 @@ dojo.declare("js.Config", null, {
     WebMapId: "",
 
     // Set the following options for the configuration of operational layers
-    PollLayer:
-          {
-              ServiceUrl: "http://services.arcgis.com/b6gLrKHqgkQb393u/ArcGIS/rest/services/PollingPlacesTryItLive/FeatureServer/0",
-              Image: "images/pollingPlace.png",
-              UseImage: false,
-              PrimaryKeyForPolling: "${POLLINGID}"
-          },
-    PollMobileLayer:
-          {
-              ServiceUrl: "http://services.arcgis.com/b6gLrKHqgkQb393u/ArcGIS/rest/services/PollingPlacesTryItLive/FeatureServer/0",
-              Image: "images/pollingPlace.png",
-              UseImage: false,
-              PrimaryKeyForPolling: "${POLLINGID}"
-          },
+    PollLayer: {
+        ServiceUrl: "http://services.arcgis.com/b6gLrKHqgkQb393u/ArcGIS/rest/services/PollingPlacesTryItLive/FeatureServer/0",
+        Image: "images/pollingPlace.png",
+        UseImage: false,
+        PrimaryKeyForPolling: "${POLLINGID}"
+    },
+    PollMobileLayer: {
+        ServiceUrl: "http://services.arcgis.com/b6gLrKHqgkQb393u/ArcGIS/rest/services/PollingPlacesTryItLive/FeatureServer/0",
+        Image: "images/pollingPlace.png",
+        UseImage: false,
+        PrimaryKeyForPolling: "${POLLINGID}"
+    },
 
-    PrecinctLayer:
-          {
-              ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/0",
-              Color: "#00ff00",
-              Alpha: 0.75,
-              UseColor: false
-          },
+    PrecinctLayer: {
+        ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/0",
+        Color: "#00ff00",
+        Alpha: 0.75,
+        UseColor: false
+    },
 
     PrecinctOfficeLayer: "http://services.arcgis.com/b6gLrKHqgkQb393u/ArcGIS/rest/services/PollingPlacesTryItLive/FeatureServer/1",
 
@@ -136,11 +130,10 @@ dojo.declare("js.Config", null, {
 
     // ServiceUrl is the REST end point for the reference overlay layer
     // DisplayOnLoad setting this will show the reference overlay layer on load
-    ReferenceOverlayLayer:
-          {
-              ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/ReferenceOverlay/MapServer",
-              DisplayOnLoad: false
-          },
+    ReferenceOverlayLayer: {
+        ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/ReferenceOverlay/MapServer",
+        DisplayOnLoad: false
+    },
 
 
     // ------------------------------------------------------------------------------------------------------------------------
@@ -158,41 +151,31 @@ dojo.declare("js.Config", null, {
     // ------------------------------------------------------------------------------------------------------------------------
     // Info-popup is a popup dialog that gets displayed on selecting a feature
     // Set the content to be displayed on the info-Popup. Define labels, field values, field types and field formats
-    InfoPopupFieldsCollection:
-          [
-                    {
-                        DisplayText: "Address:",
-                        FieldName: "${FULLADD},${CITY},${STATE}"
-                    },
-                    {
-                        DisplayText: "Registration Deadline:",
-                        FieldName: "${REGDATE}"
-                    },
-                    {
-                        DisplayText: "Election Date:",
-                        FieldName: "${NEXTELECT}"
-                    },
-                    {
-                        DisplayText: "Hours:",
-                        FieldName: "${OPERHOURS}"
-                    },
-                    {
-                        DisplayText: "ADA Accessible:",
-                        FieldName: "${HANDICAP}"
-                    },
-                    {
-                        DisplayText: "Contact:",
-                        FieldName: "${CONTACT}"
-                    },
-                    {
-                        DisplayText: "Phone:",
-                        FieldName: "${PHONE}"
-                    },
-                    {
-                        DisplayText: "Email:",
-                        FieldName: "${EMAIL}"
-                    }
-          ],
+    InfoPopupFieldsCollection: [{
+        DisplayText: "Address:",
+        FieldName: "${FULLADD},${CITY},${STATE}"
+    }, {
+        DisplayText: "Registration Deadline:",
+        FieldName: "${REGDATE}"
+    }, {
+        DisplayText: "Election Date:",
+        FieldName: "${NEXTELECT}"
+    }, {
+        DisplayText: "Hours:",
+        FieldName: "${OPERHOURS}"
+    }, {
+        DisplayText: "ADA Accessible:",
+        FieldName: "${HANDICAP}"
+    }, {
+        DisplayText: "Contact:",
+        FieldName: "${CONTACT}"
+    }, {
+        DisplayText: "Phone:",
+        FieldName: "${PHONE}"
+    }, {
+        DisplayText: "Email:",
+        FieldName: "${EMAIL}"
+    }],
 
     // Set this to true to show "Comments" tab in the info-Popup
     ShowCommentsTab: true,
@@ -216,7 +199,10 @@ dojo.declare("js.Config", null, {
     // Set Locator service settings
     LocatorSettings: {
         DefaultLocatorSymbol: "images/RedPushpin.png",
-        SymbolSize: { width: 25, height: 25 },
+        SymbolSize: {
+            width: 25,
+            height: 25
+        },
         DefaultValue: "139 W Porter Ave Naperville IL 60540",
         LocatorParameters: ["SingleLine"],
         LocatorFields: ["Address", "City", "State", "Zip"],
@@ -224,7 +210,7 @@ dojo.declare("js.Config", null, {
         CandidateFields: "Loc_name, Score, Match_addr",
         FieldName: "${Match_addr}",
         LocatorFieldName: 'Loc_name',
-        LocatorFieldValues: ["USA.StreetName" , "USA.PointAddress", "USA.StreetAddress"],
+        LocatorFieldValues: ["USA.StreetName", "USA.PointAddress", "USA.StreetAddress"],
         AddressMatchScore: 80,
         LocatorRippleSize: 40
     },
@@ -260,186 +246,136 @@ dojo.declare("js.Config", null, {
 
 
     // Set data to be displayed in the "Polling Place" tab on the bottom panel
-    PollingPlaceTabData:
-          {
-              DetailsBox:
-                    {
-                        HeaderColor: "#303030",
-                        Title: "<b>Details</b>",
-                        Data:
-                              [
-                                        {
-                                            DisplayText: "Name:",
-                                            FieldName: "${NAME}"
-                                        },
-                                        {
-                                            DisplayText: "Address:",
-                                            FieldName: "${FULLADD},${CITY},${STATE}"
-                                        },
-                                        {
-                                            DisplayText: "Hours:",
-                                            FieldName: "${OPERHOURS}"
-                                        },
-                                        {
-                                            DisplayText: "ADA Accessible:",
-                                            FieldName: "${HANDICAP}"
-                                        }
-                              ]
-                    },
-              InformationBox:
-                    {
-                        HeaderColor: "#303030",
-                        Title: "<b>Information</b>",
-                        AttachmentDisplayField: "Ballot",
-                        Data:
-                              [
-                                        {
-                                            DisplayText: "Registration Deadline:",
-                                            FieldName: "${REGDATE}"
-                                        },
-                                        {
-                                            DisplayText: "Election Date:",
-                                            FieldName: "${NEXTELECT}"
-                                        }
-                              ]
-                    },
-              ContactBox:
-                    {
-                        HeaderColor: "#303030",
-                        Title: "<b>Contact</b>",
-                        Data:
-                              [
-                                        {
-                                            DisplayText: "Contact:",
-                                            FieldName: "${CONTACT}"
-                                        },
-                                        {
-                                            DisplayText: "Phone:",
-                                            FieldName: "${PHONE}"
-                                        },
-                                        {
-                                            DisplayText: "Email:",
-                                            FieldName: "${EMAIL}"
-                                        }
-                              ]
-                    },
-              DirectionBox:
-                    {
-                        HeaderColor: "#303030",
-                        Title: "<b>Directions</b>",
-                        ShowDirection: true
-                    },
-              CommentsBox:
-                    {
-                        HeaderColor: "#303030",
-                        Title: "<b>Comments</b>"
-                    }
-          },
+    PollingPlaceTabData: {
+        DetailsBox: {
+            HeaderColor: "#303030",
+            Title: "<b>Details</b>",
+            Data: [{
+                DisplayText: "Name:",
+                FieldName: "${NAME}"
+            }, {
+                DisplayText: "Address:",
+                FieldName: "${FULLADD},${CITY},${STATE}"
+            }, {
+                DisplayText: "Hours:",
+                FieldName: "${OPERHOURS}"
+            }, {
+                DisplayText: "ADA Accessible:",
+                FieldName: "${HANDICAP}"
+            }]
+        },
+        InformationBox: {
+            HeaderColor: "#303030",
+            Title: "<b>Information</b>",
+            AttachmentDisplayField: "Ballot",
+            Data: [{
+                DisplayText: "Registration Deadline:",
+                FieldName: "${REGDATE}"
+            }, {
+                DisplayText: "Election Date:",
+                FieldName: "${NEXTELECT}"
+            }]
+        },
+        ContactBox: {
+            HeaderColor: "#303030",
+            Title: "<b>Contact</b>",
+            Data: [{
+                DisplayText: "Contact:",
+                FieldName: "${CONTACT}"
+            }, {
+                DisplayText: "Phone:",
+                FieldName: "${PHONE}"
+            }, {
+                DisplayText: "Email:",
+                FieldName: "${EMAIL}"
+            }]
+        },
+        DirectionBox: {
+            HeaderColor: "#303030",
+            Title: "<b>Directions</b>",
+            ShowDirection: true
+        },
+        CommentsBox: {
+            HeaderColor: "#303030",
+            Title: "<b>Comments</b>"
+        }
+    },
 
     // Set data to be displayed in the "Elected Officials" tab on the bottom panel
-    ElectedOfficialsTabData:
-          {
-              USCongressionalLayer:
-                    {
-                        ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/4",
-                        HeaderColor: "#303030",
-                        Title: "<b>US Congressional District</b>",
-                        Data:
-                              [
-                                        {
-                                            DisplayText: "District ID:",
-                                            FieldName: "${DISTRICTID}"
-                                        },
-                                        {
-                                            DisplayText: "District Name:",
-                                            FieldName: "${NAME}"
-                                        },
-                                        {
-                                            DisplayText: "District URL:",
-                                            FieldName: "${DISTRICTURL}"
-                                        },
-                                        {
-                                            DisplayText: "Representative(s):",
-                                            FieldName: "${REPNAME}"
-                                        }
-                              ]
-                    },
-              StateSenateLayer:
-                    {
-                        ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/3",
-                        HeaderColor: "#303030",
-                        Title: "<b>State Senate District</b>",
-                        Data:
-                              [
-                                        {
-                                            DisplayText: "District ID:",
-                                            FieldName: "${DISTRICTID}"
-                                        },
-                                        {
-                                            DisplayText: "District Name:",
-                                            FieldName: "${NAME}"
-                                        },
-                                        {
-                                            DisplayText: "District URL:",
-                                            FieldName: "${DISTRICTURL}"
-                                        },
-                                        {
-                                            DisplayText: "Representative(s):",
-                                            FieldName: "${REPNAME}"
-                                        }
-                              ]
-                    },
-              StateHouseLayer:
-                    {
-                        ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/2",
-                        HeaderColor: "#303030",
-                        Title: "<b>State House District</b>",
-                        Data:
-                              [
-                                        {
-                                            DisplayText: "District ID:",
-                                            FieldName: "${DISTRICTID}"
-                                        },
-                                        {
-                                            DisplayText: "District Name:",
-                                            FieldName: "${NAME}"
-                                        },
-                                        {
-                                            DisplayText: "District URL:",
-                                            FieldName: "${DISTRICTURL}"
-                                        },
-                                        {
-                                            DisplayText: "Representative(s):",
-                                            FieldName: "${REPNAME}"
-                                        }
-                              ]
-                    },
-              CountyLayer:
-                    {
-                        ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/1",
-                        HeaderColor: "#303030",
-                        Title: "<b>County District</b>",
-                        Data:
-                              [
-                                        {
-                                            DisplayText: "District ID:",
-                                            FieldName: "${DISTRICTID}"
-                                        },
-                                        {
-                                            DisplayText: "District Name:",
-                                            FieldName: "${NAME}"
-                                        },
-                                        {
-                                            DisplayText: "District URL:",
-                                            FieldName: "${DISTRICTURL}"
-                                        },
-                                        {
-                                            DisplayText: "Representative(s):",
-                                            FieldName: "${REPNAME}"
-                                        }
-                              ]
-                    }
-          },
+    ElectedOfficialsTabData: {
+        USCongressionalLayer: {
+            ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/4",
+            HeaderColor: "#303030",
+            Title: "<b>US Congressional District</b>",
+            Data: [{
+                DisplayText: "District ID:",
+                FieldName: "${DISTRICTID}"
+            }, {
+                DisplayText: "District Name:",
+                FieldName: "${NAME}"
+            }, {
+                DisplayText: "District URL:",
+                FieldName: "${DISTRICTURL}"
+            }, {
+                DisplayText: "Representative(s):",
+                FieldName: "${REPNAME}"
+            }]
+        },
+        StateSenateLayer: {
+            ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/3",
+            HeaderColor: "#303030",
+            Title: "<b>State Senate District</b>",
+            Data: [{
+                DisplayText: "District ID:",
+                FieldName: "${DISTRICTID}"
+            }, {
+                DisplayText: "District Name:",
+                FieldName: "${NAME}"
+            }, {
+                DisplayText: "District URL:",
+                FieldName: "${DISTRICTURL}"
+            }, {
+                DisplayText: "Representative(s):",
+                FieldName: "${REPNAME}"
+            }]
+        },
+        StateHouseLayer: {
+            ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/2",
+            HeaderColor: "#303030",
+            Title: "<b>State House District</b>",
+            Data: [{
+                DisplayText: "District ID:",
+                FieldName: "${DISTRICTID}"
+            }, {
+                DisplayText: "District Name:",
+                FieldName: "${NAME}"
+            }, {
+                DisplayText: "District URL:",
+                FieldName: "${DISTRICTURL}"
+            }, {
+                DisplayText: "Representative(s):",
+                FieldName: "${REPNAME}"
+            }]
+        },
+        CountyLayer: {
+            ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/1",
+            HeaderColor: "#303030",
+            Title: "<b>County District</b>",
+            Data: [{
+                DisplayText: "District ID:",
+                FieldName: "${DISTRICTID}"
+            }, {
+                DisplayText: "District Name:",
+                FieldName: "${NAME}"
+            }, {
+                DisplayText: "District URL:",
+                FieldName: "${DISTRICTURL}"
+            }, {
+                DisplayText: "Representative(s):",
+                FieldName: "${REPNAME}"
+            }]
+        }
+    },
 
     // Define the database field names
     // Note: DateFieldName refers to a date database field.
@@ -460,13 +396,12 @@ dojo.declare("js.Config", null, {
     // SETTINGS FOR MAP SHARING
     // ------------------------------------------------------------------------------------------------------------------------
     // Set URL for TinyURL service, and URLs for social media
-    MapSharingOptions:
-          {
-              TinyURLServiceURL: "http://api.bit.ly/v3/shorten?login=esri&apiKey=R_65fd9891cd882e2a96b99d4bda1be00e&uri=${0}&format=json",
-              TinyURLResponseAttribute: "data.url",
+    MapSharingOptions: {
+        TinyURLServiceURL: "http://api.bit.ly/v3/shorten?login=esri&apiKey=R_65fd9891cd882e2a96b99d4bda1be00e&uri=${0}&format=json",
+        TinyURLResponseAttribute: "data.url",
 
-              FacebookShareURL: "http://www.facebook.com/sharer.php?u=${0}&t=Election%20Polling%20Place",
-              TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Election%20Polling%20Place ${0}",
-              ShareByMailLink: "mailto:%20?subject=Checkout%20this%20map!&body=${0}"
-          }
+        FacebookShareURL: "http://www.facebook.com/sharer.php?u=${0}&t=Election%20Polling%20Place",
+        TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Election%20Polling%20Place ${0}",
+        ShareByMailLink: "mailto:%20?subject=Checkout%20this%20map!&body=${0}"
+    }
 });
