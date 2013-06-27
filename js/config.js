@@ -79,12 +79,12 @@ dojo.declare("js.Config", null, {
         Key: "parcelMap",
         ThumbnailSource: "images/parcelMap.png",
         Name: "Streets",
-        MapURL: "http://arcgis-tenone2012-1974758903.us-west-1.elb.amazonaws.com/arcgis/rest/services/ParcelPublicAccess/MapServer"
+        MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/GeneralPurpose/MapServer"
     }, {
         Key: "hybridMap",
         ThumbnailSource: "images/imageryHybrid.png",
         Name: "Imagery",
-        MapURL: "http://arcgis-tenone2012-1974758903.us-west-1.elb.amazonaws.com/arcgis/rest/services/ImageryHybrid/MapServer"
+        MapURL: "http://tryitlive.arcgis.com/arcgis/rest/services/ImageryHybrid/MapServer"
     }],
 
     // Initial map extent. Use comma (,) to separate values and don t delete the last comma
@@ -113,7 +113,7 @@ dojo.declare("js.Config", null, {
     },
 
     PrecinctLayer: {
-        ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/0",
+        ServiceUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/Precincts/MapServer/0",
         Color: "#00ff00",
         Alpha: 0.75,
         UseColor: false
@@ -131,7 +131,7 @@ dojo.declare("js.Config", null, {
     // ServiceUrl is the REST end point for the reference overlay layer
     // DisplayOnLoad setting this will show the reference overlay layer on load
     ReferenceOverlayLayer: {
-        ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/ReferenceOverlay/MapServer",
+        ServiceUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/ReferenceOverlay/MapServer",
         DisplayOnLoad: false
     },
 
@@ -219,7 +219,7 @@ dojo.declare("js.Config", null, {
     // GEOMETRY SERVICE SETTINGS
     // ------------------------------------------------------------------------------------------------------------------------
     // Set geometry service URL
-    GeometryService: "http://arcgis-tenone2012-1974758903.us-west-1.elb.amazonaws.com/arcgis/rest/services/Utilities/Geometry/GeometryServer",
+    GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 
 
     // ------------------------------------------------------------------------------------------------------------------------
@@ -304,7 +304,7 @@ dojo.declare("js.Config", null, {
     // Set data to be displayed in the "Elected Officials" tab on the bottom panel
     ElectedOfficialsTabData: {
         USCongressionalLayer: {
-            ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/4",
+            ServiceUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/Precincts/MapServer/4",
             HeaderColor: "#303030",
             Title: "<b>US Congressional District</b>",
             Data: [{
@@ -322,7 +322,7 @@ dojo.declare("js.Config", null, {
             }]
         },
         StateSenateLayer: {
-            ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/3",
+            ServiceUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/Precincts/MapServer/3",
             HeaderColor: "#303030",
             Title: "<b>State Senate District</b>",
             Data: [{
@@ -340,7 +340,7 @@ dojo.declare("js.Config", null, {
             }]
         },
         StateHouseLayer: {
-            ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/2",
+            ServiceUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/Precincts/MapServer/2",
             HeaderColor: "#303030",
             Title: "<b>State House District</b>",
             Data: [{
@@ -358,7 +358,7 @@ dojo.declare("js.Config", null, {
             }]
         },
         CountyLayer: {
-            ServiceUrl: "http://ec2-54-214-140-9.us-west-2.compute.amazonaws.com:6080/arcgis/rest/services/Precincts/MapServer/1",
+            ServiceUrl: "http://tryitlive.arcgis.com/arcgis/rest/services/Precincts/MapServer/1",
             HeaderColor: "#303030",
             Title: "<b>County District</b>",
             Data: [{
