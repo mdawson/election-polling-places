@@ -60,7 +60,8 @@ Find a bug or want to request a new feature?  Please let us know by submitting a
 
 ## Contributing
 
-Anyone and everyone is welcome to contribute.
+Esri welcomes contributions from anyone and everyone.
+Please see our [guidelines for contributing](https://github.com/esri/contributing).
 
 ## Licensing
 
@@ -79,7 +80,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 A copy of the license is available in the repository's
-[license.txt](https://raw.github.com/Esri/election-polling-places/master/license.txt) file.
+[LICENSE.txt](https://raw.github.com/Esri/election-polling-places/master/LICENSE.txt) file.
 
 [](Esri Tags: Local-Government Local Government Election Polling Places)
 [](Esri Language: JavaScript)
