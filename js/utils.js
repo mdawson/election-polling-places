@@ -64,105 +64,109 @@ function CreatePollingDetailsScrollBar(container, content) {
 //Populate data in the bottom panel
 function DetailsContent(feature, attributes, pollingPlaceData) {
     for (var i in map.getLayer(pollLayerId).fields) {
-        if (!attributes[map.getLayer(pollLayerId).fields[i].name]) {
-            attributes[map.getLayer(pollLayerId).fields[i].name] = "-";
-            continue;
-        }
-        if (map.getLayer(pollLayerId).fields[i].type == "esriFieldTypeDate") {
-            if (attributes[map.getLayer(pollLayerId).fields[i].name]) {
-                if (Number(attributes[map.getLayer(pollLayerId).fields[i].name])) {
-                    var date = new js.date();
-                    var utcMilliseconds = Number(attributes[map.getLayer(pollLayerId).fields[i].name]);
-                    attributes[map.getLayer(pollLayerId).fields[i].name] = dojo.date.locale.format(date.utcTimestampFromMs(utcMilliseconds), { datePattern: formatDateAs, selector: "date" });
+        if (map.getLayer(pollLayerId).fields.hasOwnProperty(i)) {
+            if (!attributes[map.getLayer(pollLayerId).fields[i].name]) {
+                attributes[map.getLayer(pollLayerId).fields[i].name] = "-";
+                continue;
+            }
+            if (map.getLayer(pollLayerId).fields[i].type == "esriFieldTypeDate") {
+                if (attributes[map.getLayer(pollLayerId).fields[i].name]) {
+                    if (Number(attributes[map.getLayer(pollLayerId).fields[i].name])) {
+                        var date = new js.date();
+                        var utcMilliseconds = Number(attributes[map.getLayer(pollLayerId).fields[i].name]);
+                        attributes[map.getLayer(pollLayerId).fields[i].name] = dojo.date.locale.format(date.utcTimestampFromMs(utcMilliseconds), { datePattern: formatDateAs, selector: "date" });
+                    }
                 }
             }
         }
     }
 
     for (var index in pollingPlaceData) {
-        if (pollingPlaceData[index].ShowDirection) {
-            continue;
-        }
-        if (pollingPlaceData[index].Data) {
-            var divContainer = dojo.byId("div" + index + "content");
-            RemoveChildren(divContainer);
-
-            divContainer.style.overflow = "hidden";
-            divContainer.style.height = "144px";
-
-            var table = document.createElement("table");
-            table.style.width = "95%";
-            table.style.paddingTop = "5px";
-            table.style.paddingLeft = "5px";
-            var tbody = document.createElement("tbody");
-            tbody.id = "tbody" + index + "Container";
-            table.appendChild(tbody);
-
-            table.cellSpacing = 2;
-            table.cellPadding = 0;
-
-            // Run through each of the lines specified for the details display
-            // Variable "attributes" contains the polling place's attributes; if this detail display
-            // was for a precinct, it also contains attributes["_PrecinctAttributes"], which are
-            // the precinct's attributes. For the details display, "FieldName" refers to the polling
-            // place attributes, while "PrecinctFieldExpression" refers to the precinct attributes.
-            for (var key = 0; key < pollingPlaceData[index].Data.length; key++) {
-                var dataLineEntry = pollingPlaceData[index].Data[key];
-                var dataLineDisplay = "";
-                if (dataLineEntry.FieldName) {
-                    dataLineDisplay = dojo.string.substitute(dataLineEntry.FieldName, attributes);
-                } else if (dataLineEntry.PrecinctFieldExpression && attributes["_PrecinctAttributes"]) {
-                    dataLineDisplay = dojo.string.substitute(
-                        dataLineEntry.PrecinctFieldExpression, attributes["_PrecinctAttributes"]);
-                }
-
-                if (dataLineDisplay.length > 0) {
-                    var tr = document.createElement("tr");
-                    tr.id = "trDataContainer";
-                    tbody.appendChild(tr);
-
-                    // Label
-                    var td1 = document.createElement("td");
-                    td1.style.height = "20px";
-                    td1.style.verticalAlign = "top";
-
-                    if (dataLineEntry.DisplayText) {
-                        td1.innerHTML = dataLineEntry.DisplayText;
-                    }
-
-                    // Value
-                    var td2 = document.createElement("td");
-                    td2.style.height = "20px";
-                    td2.style.verticalAlign = "top";
-                    td2.style.paddingLeft = "5px";
-                    td2.className = "tdBreak";
-
-                    if (CheckMailFormat(dataLineDisplay)) {
-                        td2.innerHTML = "<u style='cursor:pointer'>" + dataLineDisplay + "</u>";
-                        td2.style.wordBreak = "break-all";
-                        td2.setAttribute("maill", dataLineDisplay);
-                        td2.onclick = function () {
-                            parent.location = "mailto:" + this.getAttribute("maill");
-                        }
-                    } else {
-                        td2.innerHTML = dataLineDisplay;
-                    }
-
-                    tr.appendChild(td1);
-                    tr.appendChild(td2);
-                    tbody.appendChild(tr);
-                }
+        if (pollingPlaceData.hasOwnProperty(index)) {
+            if (pollingPlaceData[index].ShowDirection) {
+                continue;
             }
-            divContainer.appendChild(table);
-            CreatePollingDetailsScrollBar("div" + index + "container", "div" + index + "content");
-        }
-        else if (showCommentsTab) {
-            if ((pollingPlaceData[index].ShowDirection != true) && (pollingPlaceData[index].ShowDirection != false)) {
-                dojo.byId("btnAddComments").setAttribute("commentsId", index);
-                FetchComments(dojo.string.substitute((isBrowser ? pollLayer.PrimaryKeyForPolling : pollMobileLayer.PrimaryKeyForPolling), attributes), index);
-                setTimeout(function () {
-                    CreatePollingDetailsScrollBar("div" + index + "container", "div" + index + "content");
-                }, 1000);
+            if (pollingPlaceData[index].Data) {
+                var divContainer = dojo.byId("div" + index + "content");
+                RemoveChildren(divContainer);
+
+                divContainer.style.overflow = "hidden";
+                divContainer.style.height = "144px";
+
+                var table = document.createElement("table");
+                table.style.width = "95%";
+                table.style.paddingTop = "5px";
+                table.style.paddingLeft = "5px";
+                var tbody = document.createElement("tbody");
+                tbody.id = "tbody" + index + "Container";
+                table.appendChild(tbody);
+
+                table.cellSpacing = 2;
+                table.cellPadding = 0;
+
+                // Run through each of the lines specified for the details display
+                // Variable "attributes" contains the polling place's attributes; if this detail display
+                // was for a precinct, it also contains attributes["_PrecinctAttributes"], which are
+                // the precinct's attributes. For the details display, "FieldName" refers to the polling
+                // place attributes, while "PrecinctFieldExpression" refers to the precinct attributes.
+                for (var key = 0; key < pollingPlaceData[index].Data.length; key++) {
+                    var dataLineEntry = pollingPlaceData[index].Data[key];
+                    var dataLineDisplay = "";
+                    if (dataLineEntry.FieldName) {
+                        dataLineDisplay = dojo.string.substitute(dataLineEntry.FieldName, attributes);
+                    } else if (dataLineEntry.PrecinctFieldExpression && attributes["_PrecinctAttributes"]) {
+                        dataLineDisplay = dojo.string.substitute(
+                        dataLineEntry.PrecinctFieldExpression, attributes["_PrecinctAttributes"]);
+                    }
+
+                    if (dataLineDisplay.length > 0) {
+                        var tr = document.createElement("tr");
+                        tr.id = "trDataContainer";
+                        tbody.appendChild(tr);
+
+                        // Label
+                        var td1 = document.createElement("td");
+                        td1.style.height = "20px";
+                        td1.style.verticalAlign = "top";
+
+                        if (dataLineEntry.DisplayText) {
+                            td1.innerHTML = dataLineEntry.DisplayText;
+                        }
+
+                        // Value
+                        var td2 = document.createElement("td");
+                        td2.style.height = "20px";
+                        td2.style.verticalAlign = "top";
+                        td2.style.paddingLeft = "5px";
+                        td2.className = "tdBreak";
+
+                        if (CheckMailFormat(dataLineDisplay)) {
+                            td2.innerHTML = "<u style='cursor:pointer'>" + dataLineDisplay + "</u>";
+                            td2.style.wordBreak = "break-all";
+                            td2.setAttribute("maill", dataLineDisplay);
+                            td2.onclick = function () {
+                                parent.location = "mailto:" + this.getAttribute("maill");
+                            }
+                        } else {
+                            td2.innerHTML = dataLineDisplay;
+                        }
+
+                        tr.appendChild(td1);
+                        tr.appendChild(td2);
+                        tbody.appendChild(tr);
+                    }
+                }
+                divContainer.appendChild(table);
+                CreatePollingDetailsScrollBar("div" + index + "container", "div" + index + "content");
+            }
+            else if (showCommentsTab) {
+                if ((pollingPlaceData[index].ShowDirection != true) && (pollingPlaceData[index].ShowDirection != false)) {
+                    dojo.byId("btnAddComments").setAttribute("commentsId", index);
+                    FetchComments(dojo.string.substitute((isBrowser ? pollLayer.PrimaryKeyForPolling : pollMobileLayer.PrimaryKeyForPolling), attributes), index);
+                    setTimeout(function () {
+                        CreatePollingDetailsScrollBar("div" + index + "container", "div" + index + "content");
+                    }, 1000);
+                }
             }
         }
     }
@@ -191,7 +195,11 @@ function CreateScrollbar(container, content) {
     }
 
     var containerHeight = dojo.coords(container);
-    scrollbar_track.style.height = (containerHeight.h - 6) + "px";
+    var height = containerHeight.h - 6;
+    if (height < 0) {
+        height = 0;
+    }
+    scrollbar_track.style.height = (height) + "px";
     scrollbar_track.style.right = 5 + 'px';
 
     var scrollbar_handle = document.createElement('div');
@@ -435,10 +443,12 @@ function ShowPollingPlace(graphic, attributes) {
     if (mapPoint) {
         if (!noRoute) {
             for (var index in pollingPlaceData) {
-                if (pollingPlaceData[index].ShowDirection) {
-                    FindRoute();
-                    flagForDirection = true;
-                    break;
+                if (pollingPlaceData.hasOwnProperty(index)) {
+                    if (pollingPlaceData[index].ShowDirection) {
+                        FindRoute();
+                        flagForDirection = true;
+                        break;
+                    }
                 }
             }
         }
@@ -453,7 +463,7 @@ function ShowPollingPlace(graphic, attributes) {
 
 //Reset comments data
 function ResetCommentValues() {
-    dojo.byId('txtComments').value = '';
+    document.getElementById("txtComments").value = "";
     document.getElementById('commentError').innerHTML = "";
     document.getElementById('commentError').style.display = 'none';
     dojo.byId('divAddComment').style.display = "none";
@@ -510,11 +520,13 @@ function AddComment() {
                         CreatePollingDetailsScrollBar("div" + dojo.byId("btnAddComments").getAttribute("commentsId") + "container", "div" + dojo.byId("btnAddComments").getAttribute("commentsId") + "content");
                     },500);
                     for (var cmtsindex in pollingPlaceData) {
-                        if (!pollingPlaceData[cmtsindex].Data) {
-                            if (!((pollingPlaceData[cmtsindex].ShowDirection) || (pollingPlaceData[cmtsindex].ShowDirection == false))) {
-                                dojo.byId("div" + cmtsindex).style.display = "block";
-                                ResetSlideControls();
-                                break;
+                        if (pollingPlaceData.hasOwnProperty(cmtsindex)) {
+                            if (!pollingPlaceData[cmtsindex].Data) {
+                                if (!((pollingPlaceData[cmtsindex].ShowDirection) || (pollingPlaceData[cmtsindex].ShowDirection == false))) {
+                                    dojo.byId("div" + cmtsindex).style.display = "block";
+                                    ResetSlideControls();
+                                    break;
+                                }
                             }
                         }
                     }
@@ -644,11 +656,13 @@ function CreateCommentRecord(attributes, i) {
         }
         var x = dojo.string.substitute(commentsInfoPopupFieldsCollection.Comments, attributes).split(" ");
         for (var i in x) {
-            w = x[i].getWidth(15) - 50;
-            var boxWidth = (isMobileDevice) ? (dojo.window.getBox().w - 10) : (infoPopupWidth - 40);
-            if (boxWidth < w) {
-                td2.className = "tdBreakWord";
-                continue;
+            if (x.hasOwnProperty(i)) {
+                w = x[i].getWidth(15) - 50;
+                var boxWidth = (isMobileDevice) ? (dojo.window.getBox().w - 10) : (infoPopupWidth - 40);
+                if (boxWidth < w) {
+                    td2.className = "tdBreakWord";
+                    continue;
+                }
             }
         }
     }
@@ -667,10 +681,12 @@ function FetchComments(pollingID, index) {
     if (!isMobileDevice) {
         if (showCommentsTab) {
             for (var cmtsindex in pollingPlaceData) {
-                if (!pollingPlaceData[cmtsindex].Data) {
-                    if (!((pollingPlaceData[cmtsindex].ShowDirection) || (pollingPlaceData[cmtsindex].ShowDirection == false))) {
-                        var indexContainer = cmtsindex;
-                        break;
+                if (pollingPlaceData.hasOwnProperty(cmtsindex)) {
+                    if (!pollingPlaceData[cmtsindex].Data) {
+                        if (!((pollingPlaceData[cmtsindex].ShowDirection) || (pollingPlaceData[cmtsindex].ShowDirection == false))) {
+                            var indexContainer = cmtsindex;
+                            break;
+                        }
                     }
                 }
             }
@@ -836,9 +852,11 @@ function ShowMyLocation() {
 function GetAttachmentInfo(files) {
     if (!isMobileDevice) {
         for (var index in pollingPlaceData) {
-            if (pollingPlaceData[index].AttachmentDisplayField) {
-                if (document.getElementById("tbody" + index + "Container")) {
-                    document.getElementById("tbody" + index + "Container").appendChild(Createfiledata(files));
+            if (pollingPlaceData.hasOwnProperty(index)) {
+                if (pollingPlaceData[index].AttachmentDisplayField) {
+                    if (document.getElementById("tbody" + index + "Container")) {
+                        document.getElementById("tbody" + index + "Container").appendChild(Createfiledata(files));
+                    }
                 }
             }
         }
@@ -892,8 +910,10 @@ function Createfiledata(files) {
             fileHeader.style.verticalAlign = "top";
             fileHeader.style.width = "40%";
             for (var a in pollingPlaceData) {
-                if (pollingPlaceData[a].AttachmentDisplayField) {
-                    fileHeader.innerHTML = pollingPlaceData[a].AttachmentDisplayField + ":";
+                if (pollingPlaceData.hasOwnProperty(a)) {
+                    if (pollingPlaceData[a].AttachmentDisplayField) {
+                        fileHeader.innerHTML = pollingPlaceData[a].AttachmentDisplayField + ":";
+                    }
                 }
             }
             filetr.appendChild(fileHeader);
@@ -938,8 +958,10 @@ function CreateData(text, attachmentURL, fileSize) {
         fileHeader.style.verticalAlign = "top";
         fileHeader.id = "tdAttachment";
         for (var att in pollingPlaceData) {
-            if (pollingPlaceData[att].AttachmentDisplayField) {
-                fileHeader.innerHTML = pollingPlaceData[att].AttachmentDisplayField + ":";
+            if (pollingPlaceData.hasOwnProperty(att)) {
+                if (pollingPlaceData[att].AttachmentDisplayField) {
+                    fileHeader.innerHTML = pollingPlaceData[att].AttachmentDisplayField + ":";
+                }
             }
         }
         filetr.appendChild(fileHeader);
@@ -993,7 +1015,13 @@ function orientationChanged() {
                         map.setExtent(GetBrowserMapExtent(selectedPollPoint));
                     }
                     orientationChange = false;
-                }, 100);
+                }, 500);
+            }
+            if ((dojo.coords("divAddressHolder").h > 0 || (dojo.coords("txtComments").h > 0)) && isAndroid && isTablet && window.matchMedia("(orientation: landscape)").matches) {
+                if ((document.activeElement.id == "txtAddress") || (document.activeElement.id == "txtComments")) {
+                    WipeOutResults();
+                    dojo.byId('imgToggleResults').src = "images/up.png";
+                }
             }
         }, timeout);
     }
@@ -1081,10 +1109,13 @@ function HideAddressContainer() {
 //Set height and create scrollbar for address results
 function SetAddressResultsHeight() {
     var height = (isMobileDevice) ? (dojo.window.getBox().h - 50) : dojo.coords(dojo.byId('divAddressHolder')).h;
+
     if (height > 0) {
         dojo.byId('divAddressScrollContent').style.height = (height - ((!isTablet) ? 120 : 140)) + "px";
     }
-    CreateScrollbar(dojo.byId("divAddressScrollContainer"), dojo.byId("divAddressScrollContent"));
+    setTimeout(function () {
+        CreateScrollbar(dojo.byId("divAddressScrollContainer"), dojo.byId("divAddressScrollContent"));
+    }, 300);
 }
 
 //Hide Info request container
@@ -1161,8 +1192,10 @@ function ShowServiceInfoDetails(mapPoint, attributes) {
     selectedPollPoint = mapPoint;
     pointAttr = attributes;
     for (var i in attributes) {
-        if (!attributes[i]) {
-            attributes[i] = "";
+        if (attributes.hasOwnProperty(i)) {
+            if (!attributes[i]) {
+                attributes[i] = "";
+            }
         }
     }
     (isMobileDevice) ? map.infoWindow.resize(225, 60) : map.infoWindow.resize(infoPopupWidth, infoPopupHeight);
@@ -1256,40 +1289,42 @@ function ServiceRequestDetails(point, attributes) {
         dojo.byId('divInfoContent').style.display = "block";
     }
     for (var index in pollingPlaceData) {
-        if (pollingPlaceData[index].ShowDirection) {
-            if (!isMobileDevice) {
-                RemoveChildren(dojo.byId('div' + index + 'content'));
-            }
-            if (map.getLayer(tempGraphicsLayerId).graphics.length == 0) {
-                if (dojo.byId('div' + index + 'content')) {
-                    dojo.byId('div' + index + 'content').innerHTML = "&nbsp;" + messages.getElementsByTagName("directionsMessage")[0].childNodes[0].nodeValue;
+        if (pollingPlaceData.hasOwnProperty(index)) {
+            if (pollingPlaceData[index].ShowDirection) {
+                if (!isMobileDevice) {
+                    RemoveChildren(dojo.byId('div' + index + 'content'));
                 }
-            }
-            else if ((pollPoint) && (pollPoint.x == point.x) && (pollPoint.y == point.y)) {
-                pollPoint = point;
-                desgFlag = true;
-                map.getLayer(pollLayerId).queryAttachmentInfos(devObjectId, GetAttachmentInfo, function (err) {
-                    GetAttachmentInfo();
-                });
-                continue;
-            }
-            else if (generateRouteToNonDesignatedPollingPlace) {
-                pollPoint = point;
-                devObjectId = attributes[map.getLayer(pollLayerId).objectIdField];
-                map.getLayer(pollLayerId).queryAttachmentInfos(devObjectId, GetAttachmentInfo, function (err) {
-                    GetAttachmentInfo();
-                });
-            }
-            else {
-                desgFlag = false;
-                if (dojo.byId('div' + index + 'content')) {
-                    dojo.byId('div' + index + 'content').style.marginTop = "2px";
-                    dojo.byId('div' + index + 'content').innerHTML = "&nbsp;" + messages.getElementsByTagName("nonDesignatedPollingPlace")[0].childNodes[0].nodeValue;
+                if (map.getLayer(tempGraphicsLayerId).graphics.length == 0) {
+                    if (dojo.byId('div' + index + 'content')) {
+                        dojo.byId('div' + index + 'content').innerHTML = "&nbsp;" + messages.getElementsByTagName("directionsMessage")[0].childNodes[0].nodeValue;
+                    }
                 }
-                devObjectId = attributes[map.getLayer(pollLayerId).objectIdField];
-                map.getLayer(pollLayerId).queryAttachmentInfos(devObjectId, GetAttachmentInfo, function (err) {
-                    GetAttachmentInfo();
-                })
+                else if ((pollPoint) && (pollPoint.x == point.x) && (pollPoint.y == point.y)) {
+                    pollPoint = point;
+                    desgFlag = true;
+                    map.getLayer(pollLayerId).queryAttachmentInfos(devObjectId, GetAttachmentInfo, function (err) {
+                        GetAttachmentInfo();
+                    });
+                    continue;
+                }
+                else if (generateRouteToNonDesignatedPollingPlace) {
+                    pollPoint = point;
+                    devObjectId = attributes[map.getLayer(pollLayerId).objectIdField];
+                    map.getLayer(pollLayerId).queryAttachmentInfos(devObjectId, GetAttachmentInfo, function (err) {
+                        GetAttachmentInfo();
+                    });
+                }
+                else {
+                    desgFlag = false;
+                    if (dojo.byId('div' + index + 'content')) {
+                        dojo.byId('div' + index + 'content').style.marginTop = "2px";
+                        dojo.byId('div' + index + 'content').innerHTML = "&nbsp;" + messages.getElementsByTagName("nonDesignatedPollingPlace")[0].childNodes[0].nodeValue;
+                    }
+                    devObjectId = attributes[map.getLayer(pollLayerId).objectIdField];
+                    map.getLayer(pollLayerId).queryAttachmentInfos(devObjectId, GetAttachmentInfo, function (err) {
+                        GetAttachmentInfo();
+                    })
+                }
             }
         }
     }
@@ -1297,16 +1332,18 @@ function ServiceRequestDetails(point, attributes) {
     ShowPollingPlace(null, attributes);
 
     for (var i in map.getLayer(pollLayerId).fields) {
-        if (!attributes[map.getLayer(pollLayerId).fields[i].name]) {
-            attributes[map.getLayer(pollLayerId).fields[i].name] = "-";
-            continue;
-        }
-        if (map.getLayer(pollLayerId).fields[i].type == "esriFieldTypeDate") {
-            if (attributes[map.getLayer(pollLayerId).fields[i].name]) {
-                if (Number(attributes[map.getLayer(pollLayerId).fields[i].name])) {
-                    var date = new js.date();
-                    var utcMilliseconds = Number(attributes[map.getLayer(pollLayerId).fields[i].name]);
-                    attributes[map.getLayer(pollLayerId).fields[i].name] = dojo.date.locale.format(date.utcTimestampFromMs(utcMilliseconds), { datePattern: formatDateAs, selector: "date" });
+        if (map.getLayer(pollLayerId).fields.hasOwnProperty(i)) {
+            if (!attributes[map.getLayer(pollLayerId).fields[i].name]) {
+                attributes[map.getLayer(pollLayerId).fields[i].name] = "-";
+                continue;
+            }
+            if (map.getLayer(pollLayerId).fields[i].type == "esriFieldTypeDate") {
+                if (attributes[map.getLayer(pollLayerId).fields[i].name]) {
+                    if (Number(attributes[map.getLayer(pollLayerId).fields[i].name])) {
+                        var date = new js.date();
+                        var utcMilliseconds = Number(attributes[map.getLayer(pollLayerId).fields[i].name]);
+                        attributes[map.getLayer(pollLayerId).fields[i].name] = dojo.date.locale.format(date.utcTimestampFromMs(utcMilliseconds), { datePattern: formatDateAs, selector: "date" });
+                    }
                 }
             }
         }
@@ -1337,96 +1374,100 @@ function ServiceRequestDetails(point, attributes) {
         tblInfoDetails.appendChild(tbodyInfoDetails);
 
         for (var ind in pollingPlaceData) {
-            if (pollingPlaceData[ind].ShowDirection) {
-                continue;
-            }
-            if (pollingPlaceData[ind].Data || pollingPlaceData[ind].ShowDirection) {
-                var trInfoDetailsHeader = document.createElement('tr');
-                tbodyInfoDetails.appendChild(trInfoDetailsHeader);
-                var tdInfoDetailsHeader = document.createElement('td');
-                trInfoDetailsHeader.appendChild(tdInfoDetailsHeader);
-                var tblDtlHdr = document.createElement('table');
-                tblDtlHdr.style.backgroundColor = pollingPlaceData[ind].HeaderColor;
-                tdInfoDetailsHeader.appendChild(tblDtlHdr);
-                tblDtlHdr.style.width = "100%";
-                var tbodyDtlHdr = document.createElement('tbody');
-                tblDtlHdr.appendChild(tbodyDtlHdr);
-                var trDtlHdr = document.createElement('tr');
-                tbodyDtlHdr.appendChild(trDtlHdr);
-                var tdDtlHdr = document.createElement("td");
-                tdDtlHdr.innerHTML = pollingPlaceData[ind].Title;
-                trDtlHdr.appendChild(tdDtlHdr);
-
-                var trInfoDetailsList = document.createElement('tr');
-                tbodyInfoDetails.appendChild(trInfoDetailsList);
-                var tdInfoDetailsList = document.createElement('td');
-                trInfoDetailsList.appendChild(tdInfoDetailsList);
-                var tblDtlLst = document.createElement("table");
-                tblDtlLst.style.width = "100%";
-                tdInfoDetailsList.appendChild(tblDtlLst);
-                var tbodyDtlLst = document.createElement('tbody');
-                tblDtlLst.appendChild(tbodyDtlLst);
-            }
-
-            for (var index in pollingPlaceData[ind].Data) {
-                var trDtlLst = document.createElement('tr');
-                tbodyDtlLst.appendChild(trDtlLst);
-
-                var td1 = document.createElement("td");
-                td1.style.verticalAlign = "top";
-                td1.style.width = "40%";
-                if (pollingPlaceData[ind].Data[index].DisplayText) {
-                    td1.innerHTML = pollingPlaceData[ind].Data[index].DisplayText;
+            if (pollingPlaceData.hasOwnProperty(ind)) {
+                if (pollingPlaceData[ind].ShowDirection) {
+                    continue;
                 }
-                else {
-                    for (var m = 0; m < map.getLayer(pollLayerId).fields.length; m++) {
-                        if ("${" + map.getLayer(pollLayerId).fields[m].name + "}" == pollingPlaceData[ind].Data[index].FieldName.split(",")[0]) {
-                            td1.innerHTML = map.getLayer(pollLayerId).fields[m].alias + ' :';
-                            break;
+                if (pollingPlaceData[ind].Data || pollingPlaceData[ind].ShowDirection) {
+                    var trInfoDetailsHeader = document.createElement('tr');
+                    tbodyInfoDetails.appendChild(trInfoDetailsHeader);
+                    var tdInfoDetailsHeader = document.createElement('td');
+                    trInfoDetailsHeader.appendChild(tdInfoDetailsHeader);
+                    var tblDtlHdr = document.createElement('table');
+                    tblDtlHdr.style.backgroundColor = pollingPlaceData[ind].HeaderColor;
+                    tdInfoDetailsHeader.appendChild(tblDtlHdr);
+                    tblDtlHdr.style.width = "100%";
+                    var tbodyDtlHdr = document.createElement('tbody');
+                    tblDtlHdr.appendChild(tbodyDtlHdr);
+                    var trDtlHdr = document.createElement('tr');
+                    tbodyDtlHdr.appendChild(trDtlHdr);
+                    var tdDtlHdr = document.createElement("td");
+                    tdDtlHdr.innerHTML = pollingPlaceData[ind].Title;
+                    trDtlHdr.appendChild(tdDtlHdr);
+
+                    var trInfoDetailsList = document.createElement('tr');
+                    tbodyInfoDetails.appendChild(trInfoDetailsList);
+                    var tdInfoDetailsList = document.createElement('td');
+                    trInfoDetailsList.appendChild(tdInfoDetailsList);
+                    var tblDtlLst = document.createElement("table");
+                    tblDtlLst.style.width = "100%";
+                    tdInfoDetailsList.appendChild(tblDtlLst);
+                    var tbodyDtlLst = document.createElement('tbody');
+                    tblDtlLst.appendChild(tbodyDtlLst);
+                }
+
+                for (var index in pollingPlaceData[ind].Data) {
+                    if (pollingPlaceData[ind].Data.hasOwnProperty(index)) {
+                        var trDtlLst = document.createElement('tr');
+                        tbodyDtlLst.appendChild(trDtlLst);
+
+                        var td1 = document.createElement("td");
+                        td1.style.verticalAlign = "top";
+                        td1.style.width = "40%";
+                        if (pollingPlaceData[ind].Data[index].DisplayText) {
+                            td1.innerHTML = pollingPlaceData[ind].Data[index].DisplayText;
                         }
-                    }
-                }
-                td1.height = 20;
-
-                var td2 = document.createElement("td");
-                td2.style.verticalAlign = "top";
-                td2.style.width = "60%";
-                td2.style.wordWrap = "break-word";
-                td2.height = 20;
-                td2.style.paddingLeft = "5px";
-                if (dojo.string.substitute(pollingPlaceData[ind].Data[index].FieldName, attributes)) {
-                    if (CheckMailFormat(dojo.string.substitute(pollingPlaceData[ind].Data[index].FieldName, attributes))) {
-                        td2.innerHTML = "<u style='cursor:pointer'>" + dojo.string.substitute(pollingPlaceData[ind].Data[index].FieldName, attributes) + "</u>";
-                        td2.style.wordBreak = "break-all";
-                        td2.setAttribute("mail", dojo.string.substitute(pollingPlaceData[ind].Data[index].FieldName, attributes));
-                        td2.onclick = function () {
-                            parent.location = "mailto:" + this.getAttribute("mail");
+                        else {
+                            for (var m = 0; m < map.getLayer(pollLayerId).fields.length; m++) {
+                                if ("${" + map.getLayer(pollLayerId).fields[m].name + "}" == pollingPlaceData[ind].Data[index].FieldName.split(",")[0]) {
+                                    td1.innerHTML = map.getLayer(pollLayerId).fields[m].alias + ' :';
+                                    break;
+                                }
+                            }
                         }
-                    }
-                    else {
-                        td2.innerHTML = dojo.string.substitute(pollingPlaceData[ind].Data[index].FieldName, attributes);
+                        td1.height = 20;
+
+                        var td2 = document.createElement("td");
+                        td2.style.verticalAlign = "top";
+                        td2.style.width = "60%";
+                        td2.style.wordWrap = "break-word";
+                        td2.height = 20;
+                        td2.style.paddingLeft = "5px";
+                        if (dojo.string.substitute(pollingPlaceData[ind].Data[index].FieldName, attributes)) {
+                            if (CheckMailFormat(dojo.string.substitute(pollingPlaceData[ind].Data[index].FieldName, attributes))) {
+                                td2.innerHTML = "<u style='cursor:pointer'>" + dojo.string.substitute(pollingPlaceData[ind].Data[index].FieldName, attributes) + "</u>";
+                                td2.style.wordBreak = "break-all";
+                                td2.setAttribute("mail", dojo.string.substitute(pollingPlaceData[ind].Data[index].FieldName, attributes));
+                                td2.onclick = function () {
+                                    parent.location = "mailto:" + this.getAttribute("mail");
+                                }
+                            }
+                            else {
+                                td2.innerHTML = dojo.string.substitute(pollingPlaceData[ind].Data[index].FieldName, attributes);
+                            }
+                        }
+                        else {
+                            td2.innerHTML = showNullValueAs;
+                        }
+
+                        trDtlLst.appendChild(td1);
+                        trDtlLst.appendChild(td2);
                     }
                 }
-                else {
-                    td2.innerHTML = showNullValueAs;
+
+                if (pollingPlaceData[ind].AttachmentDisplayField) {
+                    var trInfLst = document.createElement('tr');
+                    trInfLst.id = "trAttachLst";
+                    tbodyInfoDetails.appendChild(trInfLst);
+                    var tdAttach = document.createElement('td');
+                    tdAttach.id = "tdAttachLst";
+                    tdAttach.height = 20;
+                    trInfLst.appendChild(tdAttach);
+                    devObjectId = attributes[map.getLayer(pollLayerId).objectIdField];
+                    map.getLayer(pollLayerId).queryAttachmentInfos(devObjectId, GetAttachmentInfo, function (err) {
+                        GetAttachmentInfo();
+                    });
                 }
-
-                trDtlLst.appendChild(td1);
-                trDtlLst.appendChild(td2);
-            }
-
-            if (pollingPlaceData[ind].AttachmentDisplayField) {
-                var trInfLst = document.createElement('tr');
-                trInfLst.id = "trAttachLst";
-                tbodyInfoDetails.appendChild(trInfLst);
-                var tdAttach = document.createElement('td');
-                tdAttach.id = "tdAttachLst";
-                tdAttach.height = 20;
-                trInfLst.appendChild(tdAttach);
-                devObjectId = attributes[map.getLayer(pollLayerId).objectIdField];
-                map.getLayer(pollLayerId).queryAttachmentInfos(devObjectId, GetAttachmentInfo, function (err) {
-                    GetAttachmentInfo();
-                });
             }
         }
     }
@@ -1437,46 +1478,48 @@ function ServiceRequestDetails(point, attributes) {
         var tbody = document.createElement("tbody");
         tblInfoDetails.appendChild(tbody);
         for (var index in infoPopupFieldsCollection) {
-            var tr = document.createElement("tr");
-            tbody.appendChild(tr);
+            if (infoPopupFieldsCollection.hasOwnProperty(index)) {
+                var tr = document.createElement("tr");
+                tbody.appendChild(tr);
 
-            var td1 = document.createElement("td");
-            td1.style.verticalAlign = "top";
-            if (infoPopupFieldsCollection[index].DisplayText) {
-                td1.innerHTML = infoPopupFieldsCollection[index].DisplayText;
-            }
-            else {
-                for (var m = 0; m < map.getLayer(pollLayerId).fields.length; m++) {
-                    if ("${" + map.getLayer(pollLayerId).fields[m].name + "}" == infoPopupFieldsCollection[index].FieldName.split(",")[0]) {
-                        td1.innerHTML = map.getLayer(pollLayerId).fields[m].alias + ' :';
-                        break;
+                var td1 = document.createElement("td");
+                td1.style.verticalAlign = "top";
+                if (infoPopupFieldsCollection[index].DisplayText) {
+                    td1.innerHTML = infoPopupFieldsCollection[index].DisplayText;
+                }
+                else {
+                    for (var m = 0; m < map.getLayer(pollLayerId).fields.length; m++) {
+                        if ("${" + map.getLayer(pollLayerId).fields[m].name + "}" == infoPopupFieldsCollection[index].FieldName.split(",")[0]) {
+                            td1.innerHTML = map.getLayer(pollLayerId).fields[m].alias + ' :';
+                            break;
+                        }
                     }
                 }
-            }
-            td1.height = 20;
+                td1.height = 20;
 
-            var td2 = document.createElement("td");
-            td2.style.verticalAlign = "top";
-            td2.height = 20;
-            td2.style.paddingLeft = "5px";
-            if (dojo.string.substitute(infoPopupFieldsCollection[index].FieldName, attributes)) {
-                if (CheckMailFormat(dojo.string.substitute(infoPopupFieldsCollection[index].FieldName, attributes))) {
-                    td2.innerHTML = "<u style='cursor:pointer'>" + dojo.string.substitute(infoPopupFieldsCollection[index].FieldName, attributes) + "</u>";
-                    td2.setAttribute("email", dojo.string.substitute(infoPopupFieldsCollection[index].FieldName, attributes));
-                    td2.onclick = function () {
-                        parent.location = "mailto:" + this.getAttribute("email");
+                var td2 = document.createElement("td");
+                td2.style.verticalAlign = "top";
+                td2.height = 20;
+                td2.style.paddingLeft = "5px";
+                if (dojo.string.substitute(infoPopupFieldsCollection[index].FieldName, attributes)) {
+                    if (CheckMailFormat(dojo.string.substitute(infoPopupFieldsCollection[index].FieldName, attributes))) {
+                        td2.innerHTML = "<u style='cursor:pointer'>" + dojo.string.substitute(infoPopupFieldsCollection[index].FieldName, attributes) + "</u>";
+                        td2.setAttribute("email", dojo.string.substitute(infoPopupFieldsCollection[index].FieldName, attributes));
+                        td2.onclick = function () {
+                            parent.location = "mailto:" + this.getAttribute("email");
+                        }
+                    }
+                    else {
+                        td2.innerHTML = dojo.string.substitute(infoPopupFieldsCollection[index].FieldName, attributes);
                     }
                 }
                 else {
-                    td2.innerHTML = dojo.string.substitute(infoPopupFieldsCollection[index].FieldName, attributes);
+                    td2.innerHTML = showNullValueAs;
                 }
-            }
-            else {
-                td2.innerHTML = showNullValueAs;
-            }
 
-            tr.appendChild(td1);
-            tr.appendChild(td2);
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+            }
         }
     }
     SetHeightViewDetails();
@@ -1592,7 +1635,6 @@ function ShowCommentsView() {
                 SetHeightComments();
             }
         } else {
-            ResetCommentValues();
             dojo.byId('divInfoComments').style.display = "block";
             dojo.byId('divInfoDetails').style.display = "none";
             dojo.byId('divInfoDirections').style.display = "none";

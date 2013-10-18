@@ -34,8 +34,10 @@ function FindRoute() {
 function CalculateRoute(mapPoint, pollPoint) {
     if (!isMobileDevice) {
         for (var index in pollingPlaceData) {
-            if (pollingPlaceData[index].ShowDirection) {
-                ShowProgressIndicator();
+            if (pollingPlaceData.hasOwnProperty(index)) {
+                if (pollingPlaceData[index].ShowDirection) {
+                    ShowProgressIndicator();
+                }
             }
         }
     }
@@ -103,13 +105,15 @@ function ShowRoute(solveResult) {
 
 
         for (var index in pollingPlaceData) {
-            if (pollingPlaceData[index].ShowDirection) {
-                var divDirections = "div" + index + "content";
-                RemoveChildren(dojo.byId(divDirections));
-            }
-            else if (pollingPlaceData[index].ShowDirection == false) {
-                var divDirection = "div" + index + "content";
-                RemoveChildren(dojo.byId(divDirection));
+            if (pollingPlaceData.hasOwnProperty(index)) {
+                if (pollingPlaceData[index].ShowDirection) {
+                    var divDirections = "div" + index + "content";
+                    RemoveChildren(dojo.byId(divDirections));
+                }
+                else if (pollingPlaceData[index].ShowDirection == false) {
+                    var divDirection = "div" + index + "content";
+                    RemoveChildren(dojo.byId(divDirection));
+                }
             }
         }
     }
@@ -120,14 +124,16 @@ function ShowRoute(solveResult) {
         divDirecHdr.style.width = "100%";
         divDirecHdr.style.marginTop = "10px";
         for (var index in pollingPlaceData) {
-            if (pollingPlaceData[index].ShowDirection) {
-                var divDirections = "div" + index + "content";
-                RemoveChildren(dojo.byId("divInfoDirectionsScroll"));
-            }
+            if (pollingPlaceData.hasOwnProperty(index)) {
+                if (pollingPlaceData[index].ShowDirection) {
+                    var divDirections = "div" + index + "content";
+                    RemoveChildren(dojo.byId("divInfoDirectionsScroll"));
+                }
 
-            if (!pollingPlaceData[index].Data) {
-                if (pollingPlaceData[index].ShowDirection)  {
-                    divDirecHdr.innerHTML = pollingPlaceData[index].Title;
+                if (!pollingPlaceData[index].Data) {
+                    if (pollingPlaceData[index].ShowDirection) {
+                        divDirecHdr.innerHTML = pollingPlaceData[index].Title;
+                    }
                 }
             }
         }
@@ -184,6 +190,7 @@ function ShowRoute(solveResult) {
 
 
         for (var i in solveResult.routeResults[0].directions.features) {
+            if (solveResult.routeResults[0].directions.features.hasOwnProperty(i)) {
             var feature = solveResult.routeResults[0].directions.features[i];
             var miles = FormatDistance(feature.attributes.length, "miles");
             var tr = document.createElement("tr");
@@ -232,6 +239,7 @@ function ShowRoute(solveResult) {
             tr.appendChild(td1);
             tr.appendChild(td);
             tbody.appendChild(tr);
+            }
         }
     }
     HideProgressIndicator();

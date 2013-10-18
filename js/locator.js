@@ -51,7 +51,6 @@ function LocateAddress() {
 //Populate candidate address list in address container
 function ShowLocatedAddress(candidates) {
     RemoveChildren(dojo.byId('tblAddressResults'));
-    CreateScrollbar(dojo.byId("divAddressScrollContainer"), dojo.byId("divAddressScrollContent"));
 
     if (candidates.length > 0) {
         var table = dojo.byId("tblAddressResults");
@@ -72,35 +71,36 @@ function ShowLocatedAddress(candidates) {
 
                 if (map.getLayer(bmap).fullExtent.contains(candidates[i].location)) {
                     for (j in locatorSettings.LocatorFieldValues) {
-                        if (candidates[i].attributes[locatorSettings.LocatorFieldName] == locatorSettings.LocatorFieldValues[j]) {
-                            counter++;
-                            var candidate = candidates[i];
-                            var tr = document.createElement("tr");
-                            tBody.appendChild(tr);
-                            var td1 = document.createElement("td");
-                            td1.innerHTML = candidate.address;
-                            td1.align = "left";
-                            td1.className = 'bottomborder';
-                            td1.style.cursor = "pointer";
-                            td1.height = 20;
-                            td1.setAttribute("x", candidate.location.x);
-                            td1.setAttribute("y", candidate.location.y);
-                            td1.setAttribute("address", candidate.address);
-                            td1.onclick = function () {
-                                dojo.byId("txtAddress").value = this.innerHTML;
-                                lastSearchString = dojo.byId("txtAddress").value.trim();
-                                dojo.byId('txtAddress').setAttribute("defaultAddress", this.innerHTML);
-                                dojo.byId("txtAddress").setAttribute("defaultAddressTitle", this.innerHTML);
-                                mapPoint = new esri.geometry.Point(this.getAttribute("x"), this.getAttribute("y"), map.spatialReference);
-                                LocateGraphicOnMap(true);
+                        if (locatorSettings.LocatorFieldValues.hasOwnProperty(j)) {
+                            if (candidates[i].attributes[locatorSettings.LocatorFieldName] == locatorSettings.LocatorFieldValues[j]) {
+                                counter++;
+                                var candidate = candidates[i];
+                                var tr = document.createElement("tr");
+                                tBody.appendChild(tr);
+                                var td1 = document.createElement("td");
+                                td1.innerHTML = candidate.address;
+                                td1.align = "left";
+                                td1.className = 'bottomborder';
+                                td1.style.cursor = "pointer";
+                                td1.height = 20;
+                                td1.setAttribute("x", candidate.location.x);
+                                td1.setAttribute("y", candidate.location.y);
+                                td1.setAttribute("address", candidate.address);
+                                td1.onclick = function () {
+                                    dojo.byId("txtAddress").value = this.innerHTML;
+                                    lastSearchString = dojo.byId("txtAddress").value.trim();
+                                    dojo.byId('txtAddress').setAttribute("defaultAddress", this.innerHTML);
+                                    dojo.byId("txtAddress").setAttribute("defaultAddressTitle", this.innerHTML);
+                                    mapPoint = new esri.geometry.Point(this.getAttribute("x"), this.getAttribute("y"), map.spatialReference);
+                                    LocateGraphicOnMap(true);
+                                }
+                                tr.appendChild(td1);
                             }
-                            tr.appendChild(td1);
                         }
                     }
                 }
             }
         }
-
         //Display error message if there are no valid candidate addresses
         if (counter == 0) {
             var tr = document.createElement("tr");
@@ -187,7 +187,9 @@ function LocateGraphicOnMap(loc) {
                 else {
                     var address = [];
                     for (var att in locatorSettings.LocatorFields) {
-                        address.push(candidate.address[locatorSettings.LocatorFields[att]]);
+                        if (locatorSettings.LocatorFields.hasOwnProperty(att)) {
+                            address.push(candidate.address[locatorSettings.LocatorFields[att]]);
+                        }
                     }
                     attr = { Address: address.join(',') };
                 }
@@ -200,7 +202,9 @@ function LocateGraphicOnMap(loc) {
     if (!isMobileDevice) {
         ShowPollingPlaceDetails();
         for (var index in electedOfficialsTabData) {
-            GetOfficeName(electedOfficialsTabData[index].URL, electedOfficialsTabData[index].Data, index);
+            if (electedOfficialsTabData.hasOwnProperty(index)) {
+                GetOfficeName(electedOfficialsTabData[index].URL, electedOfficialsTabData[index].Data, index);
+            }
         }
     }
     HideAddressContainer();

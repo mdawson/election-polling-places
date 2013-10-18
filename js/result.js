@@ -139,8 +139,10 @@ function FindLocation(evt) {
     ShowProgressIndicator();
     if (!isMobileDevice) {
         for (var index in electedOfficialsTabData) {
-            if (electedOfficialsTabData[index]) {
-                RemoveChildren(dojo.byId('div' + index + 'content'));
+            if (electedOfficialsTabData.hasOwnProperty(index)) {
+                if (electedOfficialsTabData[index]) {
+                    RemoveChildren(dojo.byId('div' + index + 'content'));
+                }
             }
         }
     }
@@ -180,7 +182,9 @@ function FindLocation(evt) {
     if (!isMobileDevice) {
         ShowPollingPlaceDetails();
         for (var index in electedOfficialsTabData) {
-            GetOfficeName(electedOfficialsTabData[index].ServiceUrl, electedOfficialsTabData[index].Data, index);
+            if (electedOfficialsTabData.hasOwnProperty(index)) {
+                GetOfficeName(electedOfficialsTabData[index].ServiceUrl, electedOfficialsTabData[index].Data, index);
+            }
         }
     }
 

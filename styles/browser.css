@@ -125,7 +125,6 @@ body,html
     -webkit-box-shadow: 0 0 15px #63BA65;
     -moz-box-shadow: 0 0 15px #63BA65;
     box-shadow: 0 0 15px #63BA65;
-    filter: progid:DXImageTransform.Microsoft.Glow(color='#8EAE21', Strength='4');
     behavior: url("styles/PIE.htc");
 }
 
