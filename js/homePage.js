@@ -52,7 +52,7 @@ var isBrowser = false; //This variable will be set to 'true' when application is
 var isiOS = false; //This variable will be set to 'true' if the application is accessed from iPhone or iPad
 var isMobileDevice = false; //This variable will be set to 'true' when application is accessed from mobile phone device
 var isTablet = false; //This variable will be set to 'true' when application is accessed from tablet device
-
+var isAndroid = false;
 
 var map;    //variable to store map object
 var mapPoint;   //variable to store mappoint
@@ -111,6 +111,7 @@ function init() {
         dojo.byId('dynamicStyleSheet').href = "styles/mobile.css";
     }
     else if ((userAgent.indexOf("iPad") >= 0) || (userAgent.indexOf("Android") >= 0)) {
+        isAndroid = navigator.userAgent.indexOf("Android") >= 0;
         fontSize = 14;
         isTablet = true;
         dojo.byId('dynamicStyleSheet').href = "styles/tablet.css";
@@ -415,16 +416,28 @@ function Initialize(responseObject) {
     dojo.connect(dojo.byId('txtAddress'), "ondblclick", ClearDefaultText);
     dojo.connect(dojo.byId('txtAddress'), "onfocus", function (evt) {
         this.style.color = "#FFF";
+        if ((dojo.coords("divAddressHolder").h > 0) && isAndroid && isTablet && window.matchMedia("(orientation: landscape)").matches) {
+            WipeOutResults();
+            dojo.byId('imgToggleResults').src = "images/up.png";
+        }
     });
-    dojo.connect(dojo.byId('txtAddress'), "onblur", ReplaceDefaultText);
 
+    dojo.connect(dojo.byId('txtAddress'), "onblur", ReplaceDefaultText);
+    dojo.connect(dojo.byId('txtComments'), "onfocus", function (evt) {
+        if (isAndroid && isTablet && window.matchMedia("(orientation: landscape)").matches) {
+            WipeOutResults();
+            dojo.byId('imgToggleResults').src = "images/up.png";
+        }
+    });
     for (var index in pollingPlaceData) {
-        if (pollingPlaceData[index].ShowDirection) {
-            routeTask = new esri.tasks.RouteTask(responseObject.RouteServiceURL);
-            routeSymbol = new esri.symbol.SimpleLineSymbol().setColor(responseObject.RouteColor).setWidth(responseObject.RouteWidth);
-            dojo.connect(routeTask, "onSolveComplete", function (routeResponse) {
-                ShowRoute(routeResponse);
-            });
+        if (pollingPlaceData.hasOwnProperty(index)) {
+            if (pollingPlaceData[index].ShowDirection) {
+                routeTask = new esri.tasks.RouteTask(responseObject.RouteServiceURL);
+                routeSymbol = new esri.symbol.SimpleLineSymbol().setColor(responseObject.RouteColor).setWidth(responseObject.RouteWidth);
+                dojo.connect(routeTask, "onSolveComplete", function (routeResponse) {
+                    ShowRoute(routeResponse);
+                });
+            }
         }
     }
 
@@ -615,6 +628,12 @@ function MapInitFunction() {
         window.onresize = function () {
             resizeHandler();
             setTimeout(function () {
+
+                if (selectedPollPoint) {
+                    if (isAndroid && isTablet && (dojo.window.getBox().h > 600)) {
+                        map.setExtent(GetBrowserMapExtent(selectedPollPoint));
+                    }
+                }
                 dojo.disconnect(handlePoll);
                 dojo.disconnect(handleElected);
                 CreateHorizontalScrollbar(dojo.byId("divOfficeData"), dojo.byId("carouselOfficescroll"));
@@ -646,11 +665,13 @@ function ShowPollingPlaceDetails() {
                 CreateDirectionsScrollBar();
             }
             for (var index in pollingPlaceData) {
-                if (pollingPlaceData[index].ShowDirection) {
-                    continue;
-                }
-                if (dojo.byId("div" + index + "content")) {
-                    CreatePollingDetailsScrollBar("div" + index + "container", "div" + index + "content");
+                if (pollingPlaceData.hasOwnProperty(index)) {
+                    if (pollingPlaceData[index].ShowDirection) {
+                        continue;
+                    }
+                    if (dojo.byId("div" + index + "content")) {
+                        CreatePollingDetailsScrollBar("div" + index + "container", "div" + index + "content");
+                    }
                 }
             }
             dojo.disconnect(handlePoll);
@@ -700,13 +721,16 @@ function CreateDataLayOut() {
     tbodyHeader.appendChild(tr);
 
     for (var index in pollingPlaceData) {
-        var cmtsBox = false;
-        if (!pollingPlaceData[index].Data) {
-            if (!((pollingPlaceData[index].ShowDirection) || (pollingPlaceData[index].ShowDirection == false))) {
-                if (showCommentsTab) {
-                    cmtsBox = true;
+        if (pollingPlaceData.hasOwnProperty(index)) {
+            var cmtsBox = false;
+            if (!pollingPlaceData[index].Data) {
+                if (!((pollingPlaceData[index].ShowDirection) || (pollingPlaceData[index].ShowDirection == false))) {
+                    if (showCommentsTab) {
+                        cmtsBox = true;
+                    }
                 }
             }
+
         }
 
         if (pollingPlaceData[index].Data || (pollingPlaceData[index].ShowDirection) || cmtsBox) {
@@ -760,38 +784,40 @@ function CreateOfficeDataLayOut() {
     var tr = document.createElement("tr");
     tbodyHeader.appendChild(tr);
     for (var index in electedOfficialsTabData) {
-        var td = document.createElement("td");
-        var templateNode = dojo.byId('divTemplate');
-        var dataContainerNode = templateNode.cloneNode(true);
-        dataContainerNode.style.display = "block";
-        dataContainerNode.id = "div" + index;
-        dataContainerNode.style.width = infoBoxWidth + "px";
+        if (electedOfficialsTabData.hasOwnProperty(index)) {
+            var td = document.createElement("td");
+            var templateNode = dojo.byId('divTemplate');
+            var dataContainerNode = templateNode.cloneNode(true);
+            dataContainerNode.style.display = "block";
+            dataContainerNode.id = "div" + index;
+            dataContainerNode.style.width = infoBoxWidth + "px";
 
-        var divDataHeader = dojo.query(".divDetailsHeader", dataContainerNode)[0];
-        var spanHeader = dojo.query(".spanHeader", divDataHeader)[0];
-        var value;
-        if (electedOfficialsTabData[index].Title.length > 0) {
-            if (isBrowser) {
-                value = electedOfficialsTabData[index].Title.trim();
-                value = value.trimString(Math.round(infoBoxWidth / 7));
-                if (value.length > Math.round(infoBoxWidth / 7)) {
-                    spanHeader.title = electedOfficialsTabData[index].Title;
+            var divDataHeader = dojo.query(".divDetailsHeader", dataContainerNode)[0];
+            var spanHeader = dojo.query(".spanHeader", divDataHeader)[0];
+            var value;
+            if (electedOfficialsTabData[index].Title.length > 0) {
+                if (isBrowser) {
+                    value = electedOfficialsTabData[index].Title.trim();
+                    value = value.trimString(Math.round(infoBoxWidth / 7));
+                    if (value.length > Math.round(infoBoxWidth / 7)) {
+                        spanHeader.title = electedOfficialsTabData[index].Title;
+                    }
+                }
+                else if (isTablet) {
+                    value = electedOfficialsTabData[index].Title.trim();
+                    value = value.trimString(Math.round(infoBoxWidth / 9));
                 }
             }
-            else if (isTablet) {
-                value = electedOfficialsTabData[index].Title.trim();
-                value = value.trimString(Math.round(infoBoxWidth / 9));
-            }
-        }
-        spanHeader.innerHTML = value;
-        divDataHeader.style.backgroundColor = electedOfficialsTabData[index].HeaderColor;
-        divDataHeader.style.borderBottom = "gray 1px solid";
-        var divDataContent = dojo.query(".divContentStyle", dataContainerNode);
-        divDataContent[0].id = "div" + index + "container";
-        divDataContent[1].id = "div" + index + "content";
+            spanHeader.innerHTML = value;
+            divDataHeader.style.backgroundColor = electedOfficialsTabData[index].HeaderColor;
+            divDataHeader.style.borderBottom = "gray 1px solid";
+            var divDataContent = dojo.query(".divContentStyle", dataContainerNode);
+            divDataContent[0].id = "div" + index + "container";
+            divDataContent[1].id = "div" + index + "content";
 
-        td.appendChild(dataContainerNode);
-        tr.appendChild(td);
+            td.appendChild(dataContainerNode);
+            tr.appendChild(td);
+        }
     }
     dojo.byId('divOfficeDataContainer').appendChild(tableHeader);
 }
