@@ -97,7 +97,7 @@ var primaryKeyForComments; //variable to store the primary key for non spatial c
 //This initialization function is called when the DOM elements are ready
 function init() {
     esri.config.defaults.io.proxyUrl = "proxy.ashx";        //Setting to use proxy file
-    esriConfig.defaults.io.alwaysUseProxy = false;
+    esriConfig.defaults.io.alwaysUseProxy = true;
     esriConfig.defaults.io.timeout = 180000;    //esri request timeout value
 
     var userAgent = window.navigator.userAgent;
