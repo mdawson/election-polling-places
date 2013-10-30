@@ -226,7 +226,7 @@ dojo.declare("js.Config", null, {
     // DRIVING DIRECTIONS SETTINGS
     // ------------------------------------------------------------------------------------------------------------------------
     // Set URL for routing service (network analyst), to turn off the routing functionality update the "ShowDirection" variable to false in the "PollingPlaceTabData" section below.
-    RouteServiceURL: "http://tasks.arcgisonline.com/ArcGIS/rest/services/NetworkAnalysis/ESRI_Route_NA/NAServer/Route",
+    RouteServiceURL: "http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World",
 
     // Set color for the route symbol
     RouteColor: "#7F7FFE",
