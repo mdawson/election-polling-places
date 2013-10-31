@@ -293,7 +293,7 @@ dojo.declare("js.Config", null, {
         DirectionBox: {
             HeaderColor: "#303030",
             Title: "<b>Directions</b>",
-            ShowDirection: true
+            ShowDirection: false
         },
         CommentsBox: {
             HeaderColor: "#303030",
