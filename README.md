@@ -4,7 +4,7 @@ The Election Polling Places application is a configuration of ArcGIS Server and 
 
 [Try the Election Polling Places application](http://localgovtemplates2.esri.com/electionpollingplace/)
 
-[![Image of Election Polling Places application](https://raw.github.com/Esri/election-polling-places/master/election-polling-places.png "Election Polling Places application")](http://localgovtemplates2.esri.com/electionpollingplace/)
+[![Image of Election Polling Places application](election-polling-places.png "Election Polling Places application")](http://localgovtemplates2.esri.com/electionpollingplace/)
 
 ## Features
 
