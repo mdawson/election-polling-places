@@ -1,5 +1,6 @@
-﻿/** @license
- | Version 10.2
+﻿/*global */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+/*
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -89,7 +90,7 @@ function ChangeBaseMap(spanControl) {
                     dojo.byId("imgThumbNail" + baseMapLayers[i].Key).style.marginTop = "0px";
                     dojo.byId("imgThumbNail" + baseMapLayers[i].Key).style.marginLeft = "0px";
                     dojo.byId("spanBaseMapText" + baseMapLayers[i].Key).style.marginTop = "0px";
-                }      
+                }
 
             var layer = map.getLayer(baseMapLayers[i].Key);
             layer.show();

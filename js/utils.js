@@ -1,5 +1,6 @@
-﻿/** @license
- | Version 10.2
+﻿/*global */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+/*
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -790,62 +791,62 @@ function ShowMyLocation() {
     }
 
     navigator.geolocation.getCurrentPosition(
-		function (position) {
-		    ShowProgressIndicator();
-		    mapPoint = new esri.geometry.Point(position.coords.longitude, position.coords.latitude, new esri.SpatialReference({ wkid: 4326 }));
-		    var graphicCollection = new esri.geometry.Multipoint(new esri.SpatialReference({ wkid: 4326 }));
-		    graphicCollection.addPoint(mapPoint);
-		    geometryService.project([graphicCollection], map.spatialReference, function (newPointCollection) {
-		        for (var bMap = 0; bMap < baseMapLayers.length; bMap++) {
-		            if (map.getLayer(baseMapLayers[bMap].Key).visible) {
-		                var bmap = baseMapLayers[bMap].Key;
-		            }
-		        }
-		        if (!map.getLayer(bmap).fullExtent.contains(newPointCollection[0].getPoint(0))) {
-		            map.infoWindow.hide();
-		            selectedPollPoint = null;
-		            pollPoint = null;
-		            mapPoint = null;
-		            featureID = null;
-		            ClearSelection();
-		            map.getLayer(tempGraphicsLayerId).clear();
-		            map.getLayer(precinctLayerId).clear();
-		            map.getLayer(routeGraphicsLayerId).clear();
-		            map.getLayer(highlightPollLayerId).clear();
-		            HideProgressIndicator();
-		            if (!isMobileDevice) {
-		                var imgToggle = dojo.byId('imgToggleResults');
-		                if (imgToggle.getAttribute("state") == "maximized") {
-		                    imgToggle.setAttribute("state", "minimized");
-		                    WipeOutResults();
-		                    dojo.byId('imgToggleResults').src = "images/up.png";
-		                }
-		            }
-		            ShowInfoDetailsView();
-		            alert(messages.getElementsByTagName("geoLocation")[0].childNodes[0].nodeValue);
-		            return;
-		        }
-		        mapPoint = newPointCollection[0].getPoint(0);
-		        LocateGraphicOnMap(false);
-		    });
-		},
-		function (error) {
-		    HideProgressIndicator();
-		    switch (error.code) {
-		        case error.TIMEOUT:
-		            alert(messages.getElementsByTagName("geolocationTimeout")[0].childNodes[0].nodeValue);
-		            break;
-		        case error.POSITION_UNAVAILABLE:
-		            alert(messages.getElementsByTagName("geolocationPositionUnavailable")[0].childNodes[0].nodeValue);
-		            break;
-		        case error.PERMISSION_DENIED:
-		            alert(messages.getElementsByTagName("geolocationPermissionDenied")[0].childNodes[0].nodeValue);
-		            break;
-		        case error.UNKNOWN_ERROR:
-		            alert(messages.getElementsByTagName("geolocationUnKnownError")[0].childNodes[0].nodeValue);
-		            break;
-		    }
-		}, { timeout: 10000 });
+        function (position) {
+            ShowProgressIndicator();
+            mapPoint = new esri.geometry.Point(position.coords.longitude, position.coords.latitude, new esri.SpatialReference({ wkid: 4326 }));
+            var graphicCollection = new esri.geometry.Multipoint(new esri.SpatialReference({ wkid: 4326 }));
+            graphicCollection.addPoint(mapPoint);
+            geometryService.project([graphicCollection], map.spatialReference, function (newPointCollection) {
+                for (var bMap = 0; bMap < baseMapLayers.length; bMap++) {
+                    if (map.getLayer(baseMapLayers[bMap].Key).visible) {
+                        var bmap = baseMapLayers[bMap].Key;
+                    }
+                }
+                if (!map.getLayer(bmap).fullExtent.contains(newPointCollection[0].getPoint(0))) {
+                    map.infoWindow.hide();
+                    selectedPollPoint = null;
+                    pollPoint = null;
+                    mapPoint = null;
+                    featureID = null;
+                    ClearSelection();
+                    map.getLayer(tempGraphicsLayerId).clear();
+                    map.getLayer(precinctLayerId).clear();
+                    map.getLayer(routeGraphicsLayerId).clear();
+                    map.getLayer(highlightPollLayerId).clear();
+                    HideProgressIndicator();
+                    if (!isMobileDevice) {
+                        var imgToggle = dojo.byId('imgToggleResults');
+                        if (imgToggle.getAttribute("state") == "maximized") {
+                            imgToggle.setAttribute("state", "minimized");
+                            WipeOutResults();
+                            dojo.byId('imgToggleResults').src = "images/up.png";
+                        }
+                    }
+                    ShowInfoDetailsView();
+                    alert(messages.getElementsByTagName("geoLocation")[0].childNodes[0].nodeValue);
+                    return;
+                }
+                mapPoint = newPointCollection[0].getPoint(0);
+                LocateGraphicOnMap(false);
+            });
+        },
+        function (error) {
+            HideProgressIndicator();
+            switch (error.code) {
+                case error.TIMEOUT:
+                    alert(messages.getElementsByTagName("geolocationTimeout")[0].childNodes[0].nodeValue);
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert(messages.getElementsByTagName("geolocationPositionUnavailable")[0].childNodes[0].nodeValue);
+                    break;
+                case error.PERMISSION_DENIED:
+                    alert(messages.getElementsByTagName("geolocationPermissionDenied")[0].childNodes[0].nodeValue);
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert(messages.getElementsByTagName("geolocationUnKnownError")[0].childNodes[0].nodeValue);
+                    break;
+            }
+        }, { timeout: 10000 });
 }
 
 //Function triggered for getting attachments information from feature layer
